@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socket io</title>
+  <style>
+    #box_messages {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .sender {
+      background-color: green;
+      margin-right: auto;
+      padding: 0.25rem 1rem;
+      border-radius: 0.5rem;
+      color: white;
+    }
+
+    .receiver {
+      background-color: red;
+      margin-left: auto;
+      padding: 0.25rem 1rem;
+      border-radius: 0.5rem;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <ul id="box_messages"></ul>
+    <form id="form">
+      <div id="typing" style="padding: .5rem; display: none;">Typing...</div>
+      <input type="text" name="message" id="message">
+      <button type="submit">send</button>
+    </form>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const form = document.getElementById('form')
+    const message_input = document.getElementById('message')
+    const box_messages = document.getElementById('box_messages')
+    const typing_div = document.getElementById('typing')
+
+    form.onsubmit = e => {
+      e.preventDefault()
+      socket.emit('send_message', e.target[0].value)
+      e.target[0].value = ''
+    }
+
+    message_input.onkeydown = e => {
+      socket.emit('typing', true)
+      setTimeout(() => {
+        socket.emit('typing', false)
+      }, 3000);
+    }
+
+    socket.on('user_typing', data => {
+      typing_div.style.display = data ? 'block' : 'none'
+    })
+
+    socket.on('messages', data => {
+      const li = document.createElement('li')
+      li.setAttribute('class', data.id === socket.id ? 'sender' : 'receiver')
+      li.textContent = data.message
+      box_messages.appendChild(li)
+    })
+
+  </script>
+</body>
+
+</html>
