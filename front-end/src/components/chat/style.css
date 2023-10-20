@@ -142,7 +142,7 @@
   gap: 0.5rem;
 }
 
-.content .box-message+.reciver {
+.content .box-message_reciver {
   flex-direction: row-reverse;
 }
 

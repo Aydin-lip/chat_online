@@ -5,12 +5,15 @@ import './style.css'
 import socket from "../../socket"
 
 const Chat = () => {
+  const [messages, setMessages] = useState([])
   const [user, setUser] = useState({})
 
   useEffect(() => {
     socket.on('get_user', user => {
-      console.log(user)
       setUser(user)
+    })
+    socket.on('messages_user', data => {
+      setMessages(data)
     })
   }, [])
 
@@ -20,18 +23,21 @@ const Chat = () => {
         <ChatHeader data={user} />
 
         <div className="content">
-          <div className="box-message">
-            <div className="avatar">
-              <img src="/images/avatar.png" alt="default avatar" />
+          {messages?.map((message, idx) =>
+            <div key={idx} className={`box-message ${message.from === user.username ? 'box-message_reciver' : ''}`}>
+              <div className="avatar">
+                <img src="/images/avatar.png" alt="default avatar" />
+              </div>
+              <div className={message.from === user.username ? 'reciver' : 'sender'}>
+                <p>
+                  {message.text}
+                </p>
+                <span className="time">{message.time}</span>
+              </div>
             </div>
-            <div className="sender">
-              <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatem recusandae nam praesentium sunt reiciendis pariatur laborum.
-              </p>
-              <span className="time">12:38 AM</span>
-            </div>
-          </div>
-          <div className="box-message reciver">
+          )}
+
+          {/* <div className="box-message reciver">
             <div className="avatar">
               <img src="/images/avatar.png" alt="default avatar" />
             </div>
@@ -41,10 +47,10 @@ const Chat = () => {
               </p>
               <span className="time">12:38 AM</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
-        <ChatFooter />
+        <ChatFooter data={user} />
       </div>
     </>
   )

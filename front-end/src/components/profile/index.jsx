@@ -7,7 +7,6 @@ const Profile = () => {
 
   useEffect(() => {
     socket.on('get_user', user => {
-      console.log(user)
       setUser(user)
     })
   }, [])

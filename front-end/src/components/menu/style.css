@@ -49,6 +49,10 @@
   font-size: .8rem;
   color: #7c7c7c;
   line-height: 0.8rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 .search {
@@ -126,4 +130,19 @@
   justify-content: center;
   align-items: center;
   margin-left: auto;
+}
+
+.avatar {
+  display: flex;
+  position: relative;
+}
+
+.avatar .status {
+  position: absolute;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: #21c421;
+  border-radius: 50%;
+  bottom: 0rem;
+  right: 0rem;
 }

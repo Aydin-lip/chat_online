@@ -9,12 +9,8 @@ const Menu = () => {
 
   useEffect(() => {
     socket.on('nick_name', value => setUsername(value))
-    socket.on('online_users', users => {
-      let users_array = []
-      for (const [key, value] of Object.entries(users)) {
-        users_array.push({ username: key, id: value })
-      }
-      setUsers(users_array)
+    socket.on('users', users => {
+      setUsers(users)
     })
   }, [username, users])
 
@@ -55,13 +51,18 @@ const Menu = () => {
               key={user.id}
               className={`user ${selectUser === user.id ? 'active_user' : ''}`}
               onClick={e => selectUserHandle(user)}>
-              <img src="/images/avatar.png" alt="default avatar" />
+              <div className="avatar">
+                <img src="/images/avatar.png" alt="default avatar" />
+                {user.online &&
+                  <div className='status'></div>
+                }
+              </div>
               <div className="title">
                 <span className="name">{user.username}</span>
-                <span className="bio">Nothing is impossible from anyone.</span>
+                <span className="bio">{user.last_message?.text}</span>
               </div>
               <div>
-                <span className="time">10:37 PM</span>
+                <span className="time">{user.last_message?.time}</span>
                 {/* <span className="badge">7</span> */}
               </div>
             </div>
