@@ -1,13 +1,24 @@
+import { useEffect, useState } from 'react'
 import './style.css'
+import socket from '../../socket'
 
 const Profile = () => {
-  return (
+  const [user, setUser] = useState({})
+
+  useEffect(() => {
+    socket.on('get_user', user => {
+      console.log(user)
+      setUser(user)
+    })
+  }, [])
+
+  return user?.id && (
     <>
       <div className='detail'>
         <div>
           <img src="/images/avatar.png" alt="default avatar" />
           <div>
-            <h6 className='detail-name'>Dianne Vanhorn</h6>
+            <h6 className='detail-name'>{user?.username}</h6>
             <span className='bio'>Jonior Developer</span>
           </div>
         </div>

@@ -1,12 +1,23 @@
+import { useEffect, useState } from "react"
 import ChatFooter from "./footer"
 import ChatHeader from "./header"
 import './style.css'
+import socket from "../../socket"
 
 const Chat = () => {
-  return (
+  const [user, setUser] = useState({})
+
+  useEffect(() => {
+    socket.on('get_user', user => {
+      console.log(user)
+      setUser(user)
+    })
+  }, [])
+
+  return user?.id && (
     <>
       <div className='chat'>
-        <ChatHeader />
+        <ChatHeader data={user} />
 
         <div className="content">
           <div className="box-message">

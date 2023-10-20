@@ -1,13 +1,35 @@
+import { useEffect, useState } from 'react'
 import './style.css'
+import socket from '../../socket'
 
 const Menu = () => {
+  const [username, setUsername] = useState('')
+  const [users, setUsers] = useState([])
+  const [selectUser, setSelectUser] = useState('')
+
+  useEffect(() => {
+    socket.on('nick_name', value => setUsername(value))
+    socket.on('online_users', users => {
+      let users_array = []
+      for (const [key, value] of Object.entries(users)) {
+        users_array.push({ username: key, id: value })
+      }
+      setUsers(users_array)
+    })
+  }, [username, users])
+
+  const selectUserHandle = user => {
+    setSelectUser(user.id)
+    socket.emit('select_user', user)
+  }
+
   return (
     <>
       <div className="menu">
         <div className="profile">
           <img src="/images/avatar.png" alt="default avatar" />
           <div className="title">
-            <span className="name main">Aydin</span>
+            <span className="name main">{username}</span>
             <span className="bio">Front end Developer</span>
           </div>
           <div className="edit">
@@ -27,50 +49,23 @@ const Menu = () => {
           <input type="text" placeholder="Search Friends" />
         </div>
         <div className="user-box">
-          <div className="user">
-            <img src="/images/avatar.png" alt="default avatar" />
-            <div className="title">
-              <span className="name">Lina Roy</span>
-              <span className="bio">Nothing is impossible from anyone.</span>
+          {users?.map(user =>
+            user.username !== username &&
+            <div
+              key={user.id}
+              className={`user ${selectUser === user.id ? 'active_user' : ''}`}
+              onClick={e => selectUserHandle(user)}>
+              <img src="/images/avatar.png" alt="default avatar" />
+              <div className="title">
+                <span className="name">{user.username}</span>
+                <span className="bio">Nothing is impossible from anyone.</span>
+              </div>
+              <div>
+                <span className="time">10:37 PM</span>
+                {/* <span className="badge">7</span> */}
+              </div>
             </div>
-            <div>
-              <span className="time">10:37 PM</span>
-              <span className="badge">7</span>
-            </div>
-          </div>
-          <div className="user active">
-            <img src="/images/avatar.png" alt="default avatar" />
-            <div className="title">
-              <span className="name">Lina Roy</span>
-              <span className="bio">Nothing is impossible from anyone.</span>
-            </div>
-            <div>
-              <span className="time">10:37 PM</span>
-              <span className="badge">7</span>
-            </div>
-          </div>
-          <div className="user">
-            <img src="/images/avatar.png" alt="default avatar" />
-            <div className="title">
-              <span className="name">Lina Roy</span>
-              <span className="bio">Nothing is impossible from anyone.</span>
-            </div>
-            <div>
-              <span className="time">10:37 PM</span>
-              <span className="badge">7</span>
-            </div>
-          </div>
-          <div className="user">
-            <img src="/images/avatar.png" alt="default avatar" />
-            <div className="title">
-              <span className="name">Lina Roy</span>
-              <span className="bio">Nothing is impossible from anyone.</span>
-            </div>
-            <div>
-              <span className="time">10:37 PM</span>
-              <span className="badge">7</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </>

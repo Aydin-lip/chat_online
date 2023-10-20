@@ -1,10 +1,10 @@
-const ChatHeader = () => {
+const ChatHeader = ({data}) => {
   return (
     <>
       <div className='header'>
         <img src="/images/avatar.png" alt="default avatar" />
         <div className='header-name'>
-          <h6 className='name'>Dianne Vanhorn</h6>
+          <h6 className='name'>{data.username}</h6>
           <span></span>
         </div>
         <div className='header-more'>

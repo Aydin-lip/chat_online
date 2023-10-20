@@ -95,8 +95,12 @@
   background-color: #ececec;
 }
 
-.user+.active {
+.active_user {
   cursor: default;
+  background-color: white;
+}
+
+.active_user:hover {
   background-color: white;
 }
 
