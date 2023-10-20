@@ -1,0 +1,142 @@
+.detail {
+  background-color: #f5f5f7;
+  width: 15rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.detail img {
+  width: 8rem;
+  height: 8rem;
+}
+
+.detail .detail-name {
+  margin: 0.8rem;
+  font-size: 1.5rem;
+}
+
+.detail .bio {
+  font-weight: 600;
+  color: #7c7c7c;
+}
+
+.detail .contact {
+  margin-top: 1rem;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.contact .message {
+  width: 50%;
+  text-align: start;
+}
+
+.contact .message .name {
+  display: block;
+  font-weight: 700;
+  margin-left: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.contact .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #c0c0fb;
+  border-radius: 50%;
+  width: 4rem;
+  height: 4rem;
+  color: blue;
+  cursor: pointer;
+}
+
+.contact .icon.right {
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.contact .video {
+  width: 50%;
+  text-align: end;
+}
+
+.contact .video .name {
+  font-weight: 700;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.hr {
+  height: 6rem;
+  border-right: 1px solid #cecece;
+}
+
+.contact svg {
+  width: 2.25rem;
+}
+
+.more {
+  color: #7c7c7c;
+  padding: 0.25rem;
+  margin-top: 1rem;
+}
+
+.more .item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.more .item .icon {
+  display: flex;
+}
+
+.more .item svg {
+  width: 1.25rem;
+}
+
+.more .item {
+  font-size: 0.9rem;
+}
+
+.attachments h5 {
+  margin-top: 1.5rem;
+  text-align: start;
+  font-size: 1rem;
+}
+
+.attachments .items {
+  display: flex;
+  justify-content: space-between;
+}
+
+.attachments .items div {
+  background-color: #8888ff7d;
+  border-radius: 0.5rem;
+  color: blue;
+  font-weight: 700;
+  font-size: 0.8rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.attachments button {
+  background-color: transparent;
+  border: 1px solid blue;
+  border-radius: 1rem;
+  padding: 0.2rem 1rem;
+  color: blue;
+  font-weight: 700;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all ease .2s;
+}
+
+.attachments button:hover {
+  background-color: #c0c0fb;
+}
