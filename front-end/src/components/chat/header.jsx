@@ -1,11 +1,25 @@
-const ChatHeader = ({data}) => {
+import { useEffect, useState } from "react"
+import socket from "../../socket"
+
+const ChatHeader = ({ data }) => {
+  const [status, setStatus] = useState(false)
+
+  useEffect(() => {
+    socket.on('status', active => {
+      console.log(active)
+      setStatus(active)
+    })
+  }, [])
+
   return (
     <>
       <div className='header'>
         <img src="/images/avatar.png" alt="default avatar" />
         <div className='header-name'>
           <h6 className='name'>{data.username}</h6>
-          <span></span>
+          {status &&
+            <span></span>
+          }
         </div>
         <div className='header-more'>
           <span>

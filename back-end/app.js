@@ -99,10 +99,47 @@ io.on('connection', socket => {
     getUsersHandler()
   })
 
-  socket.on('select_user', user => {
-    users_active_page[userName] = users.find(u => u.id === user.id)
+  socket.on('select_chat', user => {
+    let findUser = users.find(u => u.id === user.id)
+    users_active_page[userName] = findUser
 
-    io.to(socket.id).emit('get_user', users_active_page[userName])
+    io.to(socket.id).emit('get_user', findUser)
+
+    // const usersArray = Object.entries(users_active_page)
+
+
+    let activeUser = []
+    for (let i = 0; i < users.length; i++) {
+
+      for (let x = 0; x < users.length; x++) {
+
+        if (
+          users_active_page[users[i].username]?.username === users[x].username &&
+          users_active_page[users[x].username]?.username === users[i].username
+        ) {
+          if (!activeUser.find(user => user.id === users[i].id)) {
+            activeUser.push(users[i])
+
+            if (!activeUser.find(user => user.id === users[x].id)) {
+              activeUser.push(users[x])
+            }
+          }
+        }
+
+      }
+    }
+
+    activeUser?.map(user => {
+      io.to(user.id).emit('status', true)
+    })
+
+    const active_users_id = activeUser.map(user => user.id)
+    const users_id = users.map(user => user.id)
+    const deactive = users_id.filter(id => !active_users_id.includes(id) && id)
+    console.log(deactive)
+    deactive?.map(id => {
+      io.to(id).emit('status', false)
+    })
 
     returnMessages()
   })
@@ -115,12 +152,15 @@ io.on('connection', socket => {
     })
     if (findToken) {
       let findMessages = messages_array.find(messages => messages.id === findToken.id)
+
+      const mySelect = users_active_page[userName]?.username
+      const inChat = users_active_page[mySelect]?.username === userName
+
       const messages = findMessages.messages
 
       io.to(socket.id).emit('messages_user', messages)
 
-      const mySelect = users_active_page[userName]?.username
-      if (users_active_page[mySelect]?.username === userName)
+      if (inChat)
         io.to(users_active_page[userName]?.id).emit('messages_user', messages)
 
     } else {

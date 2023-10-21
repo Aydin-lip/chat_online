@@ -16,7 +16,7 @@ const Menu = () => {
 
   const selectUserHandle = user => {
     setSelectUser(user.id)
-    socket.emit('select_user', user)
+    socket.emit('select_chat', user)
   }
 
   return (
