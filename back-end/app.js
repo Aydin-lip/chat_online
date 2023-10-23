@@ -47,13 +47,10 @@ let messages_array = [
   //       text: '',
   //       from: '',
   //       to: '',
-  //       time: ''
+  //       time: '',
+  //       unVisit: false | 'username',
   //     }
   //   ],
-  //   unvisited: {
-  //     count: 0,
-  //     for: ''
-  //   }
   // }
 ]
 
@@ -75,9 +72,12 @@ io.on('connection', socket => {
           }
         })
         if (findToken) {
-          const findMessage = messages_array.find(messages => messages.id === findToken.id)
-          const lastMessage = findMessage.messages[findMessage.messages?.length - 1]
+          const findMessages = messages_array.find(messages => messages.id === findToken.id)
+          const notSeenMessages = findMessages.messages.filter(mess => mess.unVisit === user.username)
+          const lastMessage = findMessages.messages[findMessages.messages?.length - 1]
+
           obj_user.last_message = lastMessage
+          obj_user.unVisit_count = notSeenMessages.length
         } else
           obj_user.last_message = {}
 
@@ -136,7 +136,7 @@ io.on('connection', socket => {
     const active_users_id = activeUser.map(user => user.id)
     const users_id = users.map(user => user.id)
     const deactive = users_id.filter(id => !active_users_id.includes(id) && id)
-    console.log(deactive)
+
     deactive?.map(id => {
       io.to(id).emit('status', false)
     })
@@ -151,17 +151,34 @@ io.on('connection', socket => {
         return tok
     })
     if (findToken) {
-      let findMessages = messages_array.find(messages => messages.id === findToken.id)
-
       const mySelect = users_active_page[userName]?.username
       const inChat = users_active_page[mySelect]?.username === userName
 
-      const messages = findMessages.messages
+      let findMessages = messages_array.find(messages => messages.id === findToken.id)
+      let filterMessages = messages_array.filter(messages => messages.id !== findToken.id)
 
-      io.to(socket.id).emit('messages_user', messages)
+      let changed = findMessages.messages?.map(message => {
+        if (message.unVisit === userName) {
+          message.unVisit = false
+        } else if (inChat) {
+          message.unVisit = false
+        }
+        return message
+      })
 
-      if (inChat)
-        io.to(users_active_page[userName]?.id).emit('messages_user', messages)
+      filterMessages.push({
+        ...findMessages,
+        messages: changed
+      })
+
+      messages_array = filterMessages
+
+      io.to(socket.id).emit('messages_user', changed)
+
+      if (inChat) {
+        io.to(users_active_page[userName]?.id).emit('messages_user', changed)
+
+      }
 
     } else {
       io.to(socket.id).emit('messages_user', [])
@@ -177,11 +194,14 @@ io.on('connection', socket => {
         return tok
     })
 
+    const inChat = users_active_page[data.to]?.username === userName
+
     let newMessage = {
       text: data.message,
       from: userName,
       to: data.to,
-      time: new Date().toLocaleTimeString()
+      time: new Date().toLocaleTimeString(),
+      unVisit: inChat ? false : data.to
     }
 
     if (findToken) {

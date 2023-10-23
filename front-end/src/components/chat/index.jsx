@@ -32,7 +32,10 @@ const Chat = () => {
                 <p>
                   {message.text}
                 </p>
-                <span className="time">{message.time}</span>
+                <span className={`time ${message.from !== user.username ? 'time_sender' : ''}`}>{message.time}</span>
+                {message.from !== user.username &&
+                  <span className="status">✔{!message.unVisit && '✔'}</span>
+                }
               </div>
             </div>
           )}

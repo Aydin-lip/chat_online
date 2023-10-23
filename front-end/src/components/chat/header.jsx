@@ -6,7 +6,6 @@ const ChatHeader = ({ data }) => {
 
   useEffect(() => {
     socket.on('status', active => {
-      console.log(active)
       setStatus(active)
     })
   }, [])

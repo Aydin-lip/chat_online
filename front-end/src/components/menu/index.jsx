@@ -44,6 +44,7 @@ const Menu = () => {
           </span>
           <input type="text" placeholder="Search Friends" />
         </div>
+        <h5 className='subtitle'>Users</h5>
         <div className="user-box">
           {users?.map(user =>
             user.username !== username &&
@@ -63,11 +64,17 @@ const Menu = () => {
               </div>
               <div>
                 <span className="time">{user.last_message?.time}</span>
-                {/* <span className="badge">7</span> */}
+                {user.last_message?.from === username &&
+                  <span className="tick_status">✔{!user.last_message?.unVisit && '✔'}</span>
+                }
+                {user.unVisit_count > 0 &&
+                  <span className="badge">{user.unVisit_count}</span>
+                }
               </div>
             </div>
           )}
         </div>
+        <h5 className='subtitle'>Groups</h5>
       </div>
     </>
   )

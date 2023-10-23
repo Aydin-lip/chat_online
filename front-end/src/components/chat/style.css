@@ -160,6 +160,11 @@
   background: #f5f5f7;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem 0.5rem 0.5rem 0;
+  position: relative;
+}
+
+.box-message .sender .time_sender {
+  margin-left: 1rem;
 }
 
 .box-message .reciver {
@@ -186,4 +191,12 @@
 
 .box-message .reciver .time {
   color: #ffffffb3;
+}
+
+.box-message .status {
+  position: absolute;
+  bottom: .2rem;
+  font-size: .75rem;
+  left: .3rem;
+  color: #7c7c7c7c;
 }
