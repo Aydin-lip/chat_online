@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 import { PulseLoader } from "react-spinners"
 import socket from "../../socket"
 
@@ -6,7 +6,7 @@ const ChatHeader = ({ data }) => {
   const [status, setStatus] = useState(false)
   const [typing, setTyping] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const onStatus = active => {
       setStatus(active)
     }

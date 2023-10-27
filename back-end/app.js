@@ -105,8 +105,6 @@ io.on('connection', socket => {
 
     io.to(socket.id).emit('get_user', findUser)
 
-    // const usersArray = Object.entries(users_active_page)
-
 
     let activeUser = []
     for (let i = 0; i < users.length; i++) {
