@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import './style.css'
+
 import socket from '../../socket'
+import './style.css'
+
 
 const Menu = () => {
   const [username, setUsername] = useState('')

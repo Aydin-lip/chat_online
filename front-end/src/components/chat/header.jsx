@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react"
+import { PulseLoader } from "react-spinners"
 import socket from "../../socket"
 
 const ChatHeader = ({ data }) => {
   const [status, setStatus] = useState(false)
+  const [typing, setTyping] = useState(false)
 
   useEffect(() => {
-    socket.on('status', active => {
+    const onStatus = active => {
       setStatus(active)
-    })
+    }
+    const onUserTyping = type => {
+      setTyping(type)
+    }
+
+    socket.on('status', onStatus)
+    socket.on('user_typing', onUserTyping)
+
+    return () => {
+      socket.off('status', onStatus)
+      socket.off('user_typing', onUserTyping)
+    }
   }, [])
 
   return (
@@ -16,8 +29,19 @@ const ChatHeader = ({ data }) => {
         <img src="/images/avatar.png" alt="default avatar" />
         <div className='header-name'>
           <h6 className='name'>{data.username}</h6>
+          {typing &&
+            <p className="typing">
+              Typing
+              <PulseLoader
+                color="#a5a5a5"
+                size={3}
+                margin={1}
+                style={{}}
+              />
+            </p>
+          }
           {status &&
-            <span></span>
+            <span className="status"></span>
           }
         </div>
         <div className='header-more'>

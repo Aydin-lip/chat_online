@@ -24,6 +24,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
 }
 
 .header .header-name h6 {
@@ -31,12 +32,22 @@
   font-size: 1.1rem;
 }
 
-.header .header-name span {
+.header .header-name .status {
   display: block;
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
   background: #00d500;
+}
+
+.header .header-name .typing {
+  margin: 0;
+  position: absolute;
+  bottom: -0.9rem;
+  left: 0.5rem;
+  font-size: 0.8rem;
+  color: #a5a5a5;
+  display: flex;
 }
 
 .header-more {

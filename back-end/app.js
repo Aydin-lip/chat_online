@@ -219,7 +219,16 @@ io.on('connection', socket => {
   })
 
 
+  socket.on('typing', type => {
+    const mySelect = users_active_page[userName]
+    const inChat = users_active_page[mySelect?.username]?.username === userName
+    if (inChat) {
+      io.to(mySelect?.id).emit('user_typing', type)
+    }
+  })
+
   socket.on('disconnect', () => {
+    delete users_active_page[userName]
     users = users.map(user => user.id === socket.id ? { ...user, online: false } : user)
     getUsersHandler()
   })

@@ -1,17 +1,34 @@
+import { useEffect, useState } from "react"
 import socket from "../../socket"
 
 const ChatFooter = ({ data }) => {
+  const [message, setMessage] = useState("")
 
   const sendMessageHandle = e => {
     e.preventDefault()
-    if (e.target[0].value?.length > 0) {
+    if (message?.length > 0) {
+      socket.emit('typing', false)
       socket.emit('send_message', {
-        message: e.target[0].value,
+        message: message,
         to: data.username
       })
-
-      e.target[0].value = ''
+      setMessage('')
     }
+  }
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      socket.emit('typing', false)
+    }, 3000)
+
+    return () => {
+      clearTimeout(delayDebounceFn)
+    }
+  }, [message])
+
+  const changeMessageHandle = e => {
+    setMessage(e.target.value)
+    socket.emit('typing', true)
   }
 
   return (
@@ -22,7 +39,7 @@ const ChatFooter = ({ data }) => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
           </svg>
         </span>
-        <input type='text' placeholder='Write Something' />
+        <input type='text' placeholder='Write Something' value={message} onChange={changeMessageHandle} />
         <div className='utils'>
           <span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
