@@ -62,7 +62,7 @@ const Menu = () => {
               </div>
               <div className="title">
                 <span className="name">{user.username}</span>
-                <span className="bio">{user.last_message?.text}</span>
+                <span className="bio">{user.last_message?.text ?? user.last_message?.name}</span>
               </div>
               <div>
                 <span className="time">{user.last_message?.time}</span>

@@ -1,9 +1,13 @@
 require('dotenv').config()
 const path = require('path')
+const fs = require('fs')
+const os = require('os')
 const { createServer } = require('http')
 
 const express = require('express')
 const { Server } = require('socket.io')
+const { v4: uuidV4 } = require('uuid')
+
 const { AccessControllers } = require('./middleware/headers')
 
 const app = express()
@@ -16,6 +20,9 @@ const io = new Server(server, {
 })
 
 app.use(AccessControllers)
+
+// app.use(express.static('public'))
+app.use(express.static(path.join(__dirname, 'public')))
 
 io.use((socket, next) => {
   // console.log(socket.request.headers.authorization)
@@ -44,6 +51,9 @@ let messages_array = [
   //   id: '',
   //   messages: [
   //     {
+  //       id: '',
+  //       type: 'message' | 'file',
+  //       name: '',
   //       text: '',
   //       from: '',
   //       to: '',
@@ -54,7 +64,9 @@ let messages_array = [
   // }
 ]
 
-io.on('connection', socket => {
+const chatNS = io.of('/chat')
+
+chatNS.on('connection', socket => {
 
   let userName
 
@@ -84,7 +96,7 @@ io.on('connection', socket => {
         return obj_user
       })
 
-      io.to(user.id).emit('users', allUsers)
+      chatNS.to(user.id).emit('users', allUsers)
     })
   }
 
@@ -94,7 +106,7 @@ io.on('connection', socket => {
     filterUsers.push({ id: socket.id, username: nickname, online: true })
     users = filterUsers
 
-    io.to(socket.id).emit('nick_name', nickname)
+    chatNS.to(socket.id).emit('nick_name', nickname)
 
     getUsersHandler()
   })
@@ -103,7 +115,7 @@ io.on('connection', socket => {
     let findUser = users.find(u => u.id === user.id)
     users_active_page[userName] = findUser
 
-    io.to(socket.id).emit('get_user', findUser)
+    chatNS.to(socket.id).emit('get_user', findUser)
 
 
     let activeUser = []
@@ -128,7 +140,7 @@ io.on('connection', socket => {
     }
 
     activeUser?.map(user => {
-      io.to(user.id).emit('status', true)
+      chatNS.to(user.id).emit('status', true)
     })
 
     const active_users_id = activeUser.map(user => user.id)
@@ -136,13 +148,13 @@ io.on('connection', socket => {
     const deactive = users_id.filter(id => !active_users_id.includes(id) && id)
 
     deactive?.map(id => {
-      io.to(id).emit('status', false)
+      chatNS.to(id).emit('status', false)
     })
 
     returnMessages()
   })
 
-  const returnMessages = () => {
+  const returnMessages = async () => {
     let findToken = tokens?.find(tok => {
       let splited = tok.token.split('_')
       if (splited.includes(users_active_page[userName]?.username) && splited.includes(userName))
@@ -156,11 +168,10 @@ io.on('connection', socket => {
       let filterMessages = messages_array.filter(messages => messages.id !== findToken.id)
 
       let changed = findMessages.messages?.map(message => {
-        if (message.unVisit === userName) {
-          message.unVisit = false
-        } else if (inChat) {
+        if (message.unVisit === userName || inChat) {
           message.unVisit = false
         }
+
         return message
       })
 
@@ -171,21 +182,41 @@ io.on('connection', socket => {
 
       messages_array = filterMessages
 
-      io.to(socket.id).emit('messages_user', changed)
+      const message_array = changed.map(mess => {
+        if (mess.type === 'File')
+          mess.file = fs.readFileSync(path.join('public', 'uploads', mess.path))
+
+        return mess
+      })
+
+      chatNS.to(socket.id).emit('messages_user', message_array)
 
       if (inChat) {
-        io.to(users_active_page[userName]?.id).emit('messages_user', changed)
-
+        chatNS.to(users_active_page[userName]?.id).emit('messages_user', message_array)
       }
 
     } else {
-      io.to(socket.id).emit('messages_user', [])
+      chatNS.to(socket.id).emit('messages_user', [])
     }
 
     getUsersHandler()
   }
 
-  socket.on('send_message', data => {
+  const saveFileHandler = async (name, file) => {
+    const splitN = name.split(".")
+    const format = splitN[splitN.length - 1]
+    const joinN = splitN.filter(s => s !== format).join('.')
+    const newN = `${joinN}&&${uuidV4()}.${format}`
+    try {
+      await fs.writeFileSync(path.join(__dirname, 'public', 'uploads', newN), file)
+      return newN
+    } catch (error) {
+      console.log(error)
+      return ''
+    }
+  }
+
+  socket.on('send_message', async data => {
     let findToken = tokens?.find(tok => {
       let splited = tok.token.split('_')
       if (splited.includes(data.to) && splited.includes(userName))
@@ -195,11 +226,26 @@ io.on('connection', socket => {
     const inChat = users_active_page[data.to]?.username === userName
 
     let newMessage = {
-      text: data.message,
+      id: uuidV4(),
+      type: data.type,
       from: userName,
       to: data.to,
       time: new Date().toLocaleTimeString(),
       unVisit: inChat ? false : data.to
+    }
+
+    switch (data.type) {
+      case 'Message':
+        newMessage.text = data.message
+        break
+      case 'File':
+        newMessage.name = data.name
+        newMessage.path = await saveFileHandler(data.name, data.file)
+        newMessage.file_type = data.file_type
+        break
+
+      default:
+        break;
     }
 
     if (findToken) {
@@ -216,12 +262,11 @@ io.on('connection', socket => {
     returnMessages()
   })
 
-
   socket.on('typing', type => {
     const mySelect = users_active_page[userName]
     const inChat = users_active_page[mySelect?.username]?.username === userName
     if (inChat) {
-      io.to(mySelect?.id).emit('user_typing', type)
+      chatNS.to(mySelect?.id).emit('user_typing', type)
     }
   })
 
@@ -231,15 +276,6 @@ io.on('connection', socket => {
     getUsersHandler()
   })
 
-
-
-  // socket.on('send_message', message => {
-  //   io.emit('messages', { message, id: socket.id })
-  // })
-
-  // socket.on('typing', data => {
-  //   socket.broadcast.emit('user_typing', data)
-  // })
 })
 
 const port = process.env.PORT || 8008

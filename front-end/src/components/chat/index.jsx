@@ -3,6 +3,7 @@ import ChatFooter from "./footer"
 import ChatHeader from "./header"
 import './style.css'
 import socket from "../../socket"
+import ByteConverter from "../../utils/fileSize"
 
 const Chat = () => {
   const [messages, setMessages] = useState([])
@@ -14,8 +15,25 @@ const Chat = () => {
     })
     socket.on('messages_user', data => {
       setMessages(data)
+      console.log(data)
     })
   }, [])
+
+  const convertBlob = data => {
+    const blob = new Blob([data.file])
+    const size = ByteConverter(blob.size)
+    const url = URL.createObjectURL(blob)
+    return { url, size }
+  }
+
+  const downloadFileHandler = data => {
+    const { url } = convertBlob(data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = data.name
+    a.click()
+    a.remove()
+  }
 
   return user?.id && (
     <>
@@ -29,9 +47,19 @@ const Chat = () => {
                 <img src="/images/avatar.png" alt="default avatar" />
               </div>
               <div className={message.from === user.username ? 'reciver' : 'sender'}>
-                <p>
-                  {message.text}
-                </p>
+                <div className={message.type === 'File' ? 'message' : ''} onClick={() => message.type === 'File' && downloadFileHandler(message)}>
+                  <p>
+                    {message.type === 'File' ? message.name : message.text}
+                  </p>
+                  {message.type === 'File' &&
+                    <span>
+                      <img src={['png', 'jpg', 'jpeg'].includes(message.file_type?.split("/")[1]) ? convertBlob(message).url : '/images/download.png'} alt="download" />
+                    </span>
+                  }
+                </div>
+                {message.type === 'File' &&
+                  <span className="size">{convertBlob(message).size}</span>
+                }
                 <span className={`time ${message.from !== user.username ? 'time_sender' : ''}`}>{message.time}</span>
                 {message.from !== user.username &&
                   <span className="status">✔{!message.unVisit && '✔'}</span>

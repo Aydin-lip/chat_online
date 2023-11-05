@@ -1,18 +1,37 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import socket from "../../socket"
 
 const ChatFooter = ({ data }) => {
   const [message, setMessage] = useState("")
 
-  const sendMessageHandle = e => {
-    e.preventDefault()
-    if (message?.length > 0) {
-      socket.emit('typing', false)
+  const fileRef = useRef()
+
+  const sendMessageHandle = (type, send_data) => {
+    socket.emit('typing', false)
+    const newMessage = {
+      type,
+      to: data.username
+    }
+    if (type === 'Message') {
       socket.emit('send_message', {
+        ...newMessage,
         message: message,
-        to: data.username
       })
       setMessage('')
+    } else if (type === 'File') {
+      socket.emit('send_message', {
+        ...newMessage,
+        name: send_data.name,
+        file: send_data.file,
+        file_type: send_data.file.type
+      })
+    }
+  }
+
+  const submitFormHandler = e => {
+    e.preventDefault()
+    if (message?.length > 0) {
+      sendMessageHandle('Message')
     }
   }
 
@@ -31,9 +50,15 @@ const ChatFooter = ({ data }) => {
     socket.emit('typing', true)
   }
 
+  const selectFileHandle = e => {
+    const file = e.target.files[0]
+    sendMessageHandle('File', { name: file.name, file })
+    fileRef.current = ''
+  }
+
   return (
     <>
-      <form className='footer' onSubmit={sendMessageHandle}>
+      <form className='footer' onSubmit={submitFormHandler}>
         <span className='microphone'>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
@@ -41,11 +66,12 @@ const ChatFooter = ({ data }) => {
         </span>
         <input type='text' placeholder='Write Something' value={message} onChange={changeMessageHandle} />
         <div className='utils'>
-          <span>
+          <label htmlFor="send-file" className="file">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13" />
             </svg>
-          </span>
+            <input type="file" id="send-file" onChange={selectFileHandle} />
+          </label>
           <span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />

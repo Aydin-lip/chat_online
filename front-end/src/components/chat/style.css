@@ -110,12 +110,14 @@
   color: #595959;
 }
 
-.footer .utils span {
+.footer .utils span,
+.file {
   display: flex;
   cursor: pointer;
 }
 
-.footer .utils span svg {
+.footer .utils span svg,
+.footer .utils .file svg {
   width: 1.5rem;
 }
 
@@ -137,6 +139,9 @@
   width: 2rem;
 }
 
+.footer .utils .file input {
+  display: none;
+}
 
 /*                                      Content style                                   */
 .content {
@@ -210,4 +215,31 @@
   font-size: .75rem;
   left: .3rem;
   color: #7c7c7c7c;
+}
+
+.box-message .message {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-direction: row-reverse;
+}
+
+.box-message .message p {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: .3rem;
+}
+
+.box-message .message img {
+  border-radius: .5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+}
+
+.box-message .size {
+  font-size: 0.7rem;
+  text-align: end;
+  display: block;
+  margin-top: -0.5rem;
 }
