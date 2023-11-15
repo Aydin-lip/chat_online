@@ -1,0 +1,49 @@
+<html>
+
+<body>
+  <audio controls autoplay></audio>
+  <script type="text/javascript" src="recorder.js"> </script>
+  <fieldset>
+    <legend>RECORD AUDIO</legend>
+    <input id="start" type="button" value="start" />
+    <input id="stop" type="button" value="stop" />
+    <input id="play" type="button" value="play" />
+  </fieldset>
+  <script>
+    // window.URL = window.URL || window.webkitURL;
+    // navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+    var recorder;
+    var audio = document.querySelector('audio');
+
+    if (navigator.getUserMedia) {
+      let mediaRecorder;
+      document.getElementById('start').onclick = () => {
+        navigator.getUserMedia({ audio: true },
+          stream => {
+            mediaRecorder = new MediaRecorder(stream)
+            mediaRecorder.start()
+
+            mediaRecorder.ondataavailable = e => {
+              const url = URL.createObjectURL(e.data)
+              audio.src = url
+            }
+
+            mediaRecorder.stop = function () {
+              stream.getAudioTracks().forEach(function (track) {
+                track.stop();
+              });
+            }
+          },
+          err => onsole.log(err))
+      }
+      document.getElementById('stop').onclick = () => {
+        mediaRecorder?.stop()
+      }
+    } else {
+      console.log('navigator.getUserMedia not present');
+    }
+  </script>
+</body>
+
+</html>

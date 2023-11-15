@@ -185,6 +185,8 @@ chatNS.on('connection', socket => {
       const message_array = changed.map(mess => {
         if (mess.type === 'File')
           mess.file = fs.readFileSync(path.join('public', 'uploads', mess.path))
+        else if (mess.type === 'Voice')
+          mess.voice = fs.readFileSync(path.join('public', 'voices', mess.path))
 
         return mess
       })
@@ -202,13 +204,13 @@ chatNS.on('connection', socket => {
     getUsersHandler()
   }
 
-  const saveFileHandler = async (name, file) => {
+  const saveFileHandler = async (name, file, savePath) => {
     const splitN = name.split(".")
     const format = splitN[splitN.length - 1]
     const joinN = splitN.filter(s => s !== format).join('.')
     const newN = `${joinN}&&${uuidV4()}.${format}`
     try {
-      await fs.writeFileSync(path.join(__dirname, 'public', 'uploads', newN), file)
+      await fs.writeFileSync(path.join(__dirname, 'public', ...savePath, newN), file)
       return newN
     } catch (error) {
       console.log(error)
@@ -240,8 +242,11 @@ chatNS.on('connection', socket => {
         break
       case 'File':
         newMessage.name = data.name
-        newMessage.path = await saveFileHandler(data.name, data.file)
+        newMessage.path = await saveFileHandler(data.name, data.file, ['uploads'])
         newMessage.file_type = data.file_type
+        break
+      case 'Voice':
+        newMessage.path = await saveFileHandler(`${userName}.wav`, data.voice, ['voices'])
         break
 
       default:
@@ -260,6 +265,13 @@ chatNS.on('connection', socket => {
     }
 
     returnMessages()
+  })
+
+  socket.on('voice_message', data => {
+    fs.writeFile(path.join(__dirname, 'public', 'voices', 'ex.wav'), data, (err) => {
+      if (err)
+        console.log(err)
+    })
   })
 
   socket.on('typing', type => {

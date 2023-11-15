@@ -84,9 +84,59 @@
   cursor: pointer;
 }
 
+.footer .microphone,
+.footer .active-mic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .footer .microphone svg {
   width: 1.5rem;
+  height: 1.5rem;
   color: #595959;
+}
+
+.footer .active-mic svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #ff3232;
+}
+
+.footer .active-mic:hover {
+  background-color: #ff424263;
+}
+
+.footer .recording {
+  position: absolute;
+  top: 2rem;
+  left: 4rem;
+  padding-left: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: #f5f5f7;
+  width: 10rem;
+}
+
+.footer .recording span {
+  display: block;
+  width: 0.6rem;
+  height: 0.6rem;
+  background: red;
+  border-radius: 50%;
+  animation: ping .8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+
+  75%,
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
 .footer input {
@@ -100,6 +150,10 @@
   padding-right: 10rem;
 }
 
+.footer input:disabled::placeholder {
+  color: #ccc;
+}
+
 .footer .utils {
   position: absolute;
   top: 1rem;
@@ -111,14 +165,15 @@
 }
 
 .footer .utils span,
-.file {
+.footer .utils label {
   display: flex;
   cursor: pointer;
 }
 
 .footer .utils span svg,
-.footer .utils .file svg {
+.footer .utils label svg {
   width: 1.5rem;
+  height: 1.5rem;
 }
 
 .footer .utils button {
@@ -132,14 +187,19 @@
 }
 
 .footer .utils button span {
-  justify-content: end;
+  justify-content: start;
 }
 
 .footer .utils button svg {
   width: 2rem;
 }
 
-.footer .utils .file input {
+.footer .utils .disabled {
+  color: #ccc;
+  cursor: default;
+}
+
+.footer .utils label input {
   display: none;
 }
 
@@ -235,6 +295,61 @@
   width: 2.5rem;
   height: 2.5rem;
   cursor: pointer;
+}
+
+.box-message .voice {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+  align-items: center;
+  width: 15rem;
+}
+
+.box-message .voice span {
+  width: auto;
+  height: auto;
+  padding: 0.5rem;
+  background: #c0c0fb;
+  color: white;
+  border-radius: 50%;
+}
+
+.box-message .voice svg {
+  display: flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+}
+
+.box-message .voice .progress {
+  width: 100%;
+  height: 0.4rem;
+  border-radius: 2rem;
+  background: #c0c0fb;
+  cursor: pointer;
+  position: relative;
+}
+
+.box-message .voice .progress::after {
+  content: '';
+  position: absolute;
+  top: -2.5px;
+  left: 2rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: #1e1efe;
+  border-radius: 50%;
+}
+
+.box-message .voice .progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2.5rem;
+  background: #1e1efe;
+  border-radius: 2rem 0 0 2rem;
 }
 
 .box-message .size {
