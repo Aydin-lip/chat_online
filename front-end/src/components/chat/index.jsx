@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import ChatFooter from "./footer"
 import ChatHeader from "./header"
-import './style.css'
 import socket from "../../socket"
-import TextMessage from "./types/text"
-import FileMessage from "./types/file"
-import VoiceMessage from "./types/voice"
+import TextMessage from "./messages/text"
+import FileMessage from "./messages/file"
+import VoiceMessage from "./messages/voice"
+import Style from './style.module.scss'
 
 const Chat = () => {
   const [messages, setMessages] = useState([])
@@ -18,10 +18,10 @@ const Chat = () => {
     const getInfoHandler = user => {
       setUser(user)
     }
-    
+
     socket.on('get_user', getInfoHandler)
     socket.on('messages_user', getMessagesHandler)
-    
+
     return () => {
       socket.off('get_user', getInfoHandler)
       socket.off('messages_user', getMessagesHandler)
@@ -30,15 +30,15 @@ const Chat = () => {
 
   return user?.id && (
     <>
-      <div className='chat'>
+      <div className={Style.chatScreen}>
         <ChatHeader data={user} />
 
-        <div className="content">
+        <div className={Style.content}>
           {messages?.map((message, idx) =>
-            <div key={idx} className={`box-message ${message.from === user.username ? 'box-message_reciver' : ''}`}>
-              <div className="avatar">
+            <div key={idx} className={`${message.from !== user.username ? Style.sender : ''}`}>
+              {/* <div className={Style.avatar}>
                 <img src="/images/avatar.png" alt="default avatar" />
-              </div>
+              </div> */}
               {message.type === 'Message' ?
                 <TextMessage message={message} user={user} />
                 : message.type === 'File' ?

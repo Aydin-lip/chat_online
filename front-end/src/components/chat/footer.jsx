@@ -7,6 +7,7 @@ import { MdOutlineKeyboardVoice } from "react-icons/md";
 import { useEffect, useMemo, useRef, useState } from "react"
 import socket from "../../socket"
 import httpService from "../../services/http.services";
+import Style from './style.module.scss'
 
 const ChatFooter = ({ data }) => {
   const [message, setMessage] = useState("")
@@ -188,8 +189,8 @@ const ChatFooter = ({ data }) => {
 
   return (
     <>
-      <form className='footer' onSubmit={submitFormHandler} >
-        <span className={`microphone ${recording ? 'active-mic' : ''}`} ref={microphoneRef}>
+      <form className={Style.footer} onSubmit={submitFormHandler} >
+        <span className={`${Style.microphone} ${recording ? Style.active : ''}`} ref={microphoneRef}>
           {recording ?
             <FaTrash />
             :
@@ -197,25 +198,25 @@ const ChatFooter = ({ data }) => {
           }
         </span>
 
-        <div className={`recording ${!recording ? 'hidden' : ''}`}>
+        <div className={`${Style.recording} ${!recording ? Style.hidden : ''}`}>
           <span></span>
           <div ref={recordingTime}></div>
         </div>
 
         <input type='text' placeholder='Write Something' value={message} onChange={changeMessageHandle} disabled={recording} />
-        <div className='utils'>
-          <label className={recording ? 'disabled' : ''} htmlFor="send-file">
+        <div className={Style.utils}>
+          <label className={recording ? Style.disabled : ''} htmlFor="send-file">
             {/* <BsLink45Deg /> */}
             <HiOutlineLink />
             <input type="file" id="send-file" onChange={selectFileHandle} />
           </label>
-          <label className={recording ? 'disabled' : ''} htmlFor="">
+          <label className={recording ? Style.disabled : ''} htmlFor="">
             <HiOutlineCamera />
           </label>
-          <label className={recording ? 'disabled' : ''} htmlFor="">
+          <label className={recording ? Style.disabled : ''} htmlFor="">
             <GrEmoji strokeWidth={.5} />
           </label >
-          <button type="submit" className="send-btn" ref={sendBtnRef}>
+          <button type="submit" ref={sendBtnRef}>
             <span>
               <FaPaperPlane />
             </span>

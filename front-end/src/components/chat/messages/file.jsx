@@ -1,6 +1,7 @@
 import axios from "axios"
 import ByteConverter from "../../../utils/fileSize"
 import { useEffect, useState } from "react"
+import Style from './style.module.scss'
 
 const FileMessage = ({ message, user }) => {
   const [fileSize, setFileSize] = useState()
@@ -41,19 +42,22 @@ const FileMessage = ({ message, user }) => {
 
   return (
     <>
-      <div className={message.from === user.username ? 'reciver' : 'sender'}>
-        <div className="message-file-type" onClick={getDataFileHandler}>
-          <p>{message.name}</p>
-          <a href=""></a>
+      <div className={`${Style.file} ${message.from === user.username ? Style.reciver : Style.sender}`}>
+        <div className={Style.file_message} onClick={getDataFileHandler}>
+          <div>
+            <p>{message.name}</p>
+            <span className={Style.file_size}>{fileSize}</span>
+          </div>
           <span>
             <img src={['png', 'jpg', 'jpeg'].includes(message.path.split('.')[message.path.split('.').length - 1]) ? message.path : '/images/download.png'} alt="download" />
           </span>
         </div>
-        <span className="size">{fileSize}</span>
-        <span className={`time ${message.from !== user.username ? 'time_sender' : ''}`}>{message.time}</span>
-        {message.from !== user.username &&
-          <span className="status">✔{!message.unVisit && '✔'}</span>
-        }
+        <div className={`${Style.time} ${message.from !== user.username ? Style.sender : ''}`}>
+          <span>{message.time}</span>
+          {message.from !== user.username &&
+            <span className={Style.status}>✔{!message.unVisit && '✔'}</span>
+          }
+        </div>
       </div>
     </>
   )

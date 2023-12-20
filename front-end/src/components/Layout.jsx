@@ -3,7 +3,7 @@ import socket from '../socket'
 import Chat from './chat'
 import Menu from './menu'
 import Profile from './profile'
-import './style.css'
+import Style from './style.module.scss'
 
 const Layout = () => {
   useEffect(() => {
@@ -14,13 +14,13 @@ const Layout = () => {
 
   return (
     <>
-      <div className='chat-box'>
+      <div className={Style.chatBox}>
         <Menu />
         <Chat />
         <Profile />
       </div>
     </>
-  )
+  ) 
 }
 
 export default Layout

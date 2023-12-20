@@ -1,6 +1,6 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
-import Layout from '../components/Layout'
 import Login from "../pages/login";
+import ChatScreen from "../pages";
 
 const PrivetRoute = ({ children }) => {
   const token = localStorage.getItem('nickname')
@@ -12,7 +12,7 @@ const Routes = createBrowserRouter([
     path: '/',
     element:
       <PrivetRoute>
-        <Layout />
+        <ChatScreen />
       </PrivetRoute>
   }, {
     path: '/login',

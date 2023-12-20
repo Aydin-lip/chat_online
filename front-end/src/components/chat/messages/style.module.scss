@@ -1,0 +1,199 @@
+@use '../../../global.scss' as *;
+
+@mixin reciver_sender-styles {
+  &.reciver {
+    background-color: $primary;
+    padding: 0.5rem;
+    border-radius: 1rem 1rem 1rem 0;
+    position: relative;
+    max-width: 15rem;
+    .time {
+      color: $text-primary;
+      font-weight: bold;
+    }
+  }
+  &.sender {
+    padding: 0.5rem;
+    background-color: $theme;
+    color: $text-secondary;
+    border-radius: 1rem 1rem 0rem 1rem;
+    max-width: 15rem;
+    .time {
+      color: $text-tertiary;
+      font-weight: bold;
+    }
+  }
+}
+
+@mixin status-style {
+  font-size: .75rem;
+  color: $text-secondary;
+}
+
+@mixin time-style {
+  font-size: 0.7rem;
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  gap: .5rem;
+  margin: 0;
+  margin-top: 0.25rem;
+  &.sender {
+    margin-left: 1rem;
+  }
+}
+
+@mixin p-style {
+  max-width: 20rem;
+  margin: 0;
+  font-size: 0.9rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  color: $text-secondary;
+}
+
+.voice {
+  @include reciver_sender-styles;
+  .voice_message {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 0.5rem;
+    align-items: center;
+    width: 15rem;
+    &>div {
+      padding-top: 0.8rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      .progress {
+        width: 100%;
+        height: 0.4rem;
+        border-radius: 2rem;
+        background-color: $text-primary;
+        cursor: pointer;
+        position: relative;
+        --progress-position: 0%;
+        &::after {
+          content: '';
+          position: absolute;
+          top: -2.5px;
+          left: var(--progress-position);
+          width: 0.7rem;
+          height: 0.7rem;
+          background-color: $theme;
+          border-radius: 50%;
+        }
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          width: calc(.5rem + var(--progress-position));
+          background-color: $theme;
+          border-radius: 2rem 0 0 2rem;
+        }
+        &.reciver {
+          &::after {
+            background-color: $text-secondary;
+          }
+          &::before {
+            background-color: $text-secondary;
+          }
+        }
+      }
+      .duration {
+        margin-right: auto;
+        color: $text-secondary;
+        font-weight: bold;
+        font-size: .8rem;
+      }
+    }
+    button {
+      width: 40px;
+      height: 40px;
+      padding: 0.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: $theme;
+      color: $text-secondary;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      &.reciver {
+        background-color: $text-secondary;
+        color: $theme;
+      }
+      svg {
+        display: flex;
+        width: 1.5rem;
+        height: 1.5rem;
+        cursor: pointer;
+      }
+    }
+  }
+  .time {
+    @include time-style;
+  }
+  .status {
+    @include status-style;
+  }
+}
+
+.text {
+  @include reciver_sender-styles;
+  .text_message {
+    p {
+      @include p-style;
+    }
+  }
+  .time {
+    @include time-style;
+  }
+  .status {
+    @include status-style;
+  }
+}
+
+.file {
+  @include reciver_sender-styles;
+  .file_message {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-direction: row-reverse;
+    div {
+      display: grid;
+      gap: 0.3rem;
+      p {
+        @include p-style;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-bottom: .3rem;
+      }
+      .file_size {
+        font-size: 0.7rem;
+        // text-align: st;
+        display: block;
+        margin-top: -0.5rem;
+        color: $text-tertiary
+      }
+    } 
+    img {
+      border-radius: .5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      cursor: pointer;
+    }
+  }
+  .time {
+    @include time-style;
+  }
+  .status {
+    @include status-style;
+  }
+}

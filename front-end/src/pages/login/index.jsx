@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
-import './style.css'
+import Style from './style.module.scss'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -22,10 +22,10 @@ const Login = () => {
 
   return (
     <>
-      <div className="main-login">
+      <div className={Style.login}>
         <div>
           <img src="/images/logo.png" alt="chat_box-logo" />
-          <h1 className='text'>Chat Box</h1>
+          <h1>Chat Box</h1>
           <form onSubmit={submitHandle}>
             <input type="text" placeholder="Nick name" />
             <button type="submit">Login</button>

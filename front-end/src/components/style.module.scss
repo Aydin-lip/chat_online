@@ -1,0 +1,12 @@
+@use '../global' as *;
+
+.chatBox {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: space-between;
+  overflow: auto;
+  background-color: $secondary;
+  background-image: url('../../public/images/chat-bg.png');
+  background-size: 10rem;
+}

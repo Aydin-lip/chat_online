@@ -1,0 +1,205 @@
+@use '../../global' as *;
+
+@mixin center-style {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chatScreen {
+  width: calc(100% - 570px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  // background-color: $primary;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  // margin-top: 0.5rem;
+  // border-bottom: 1px solid $text-primary;
+  background-color: $primary;
+  img {
+    width: 2.5rem;
+  }
+  .information {
+    margin-left: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    h6 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: $text-secondary;
+    }
+    .typing {
+      margin: 0;
+      position: absolute;
+      bottom: -0.9rem;
+      left: 0.5rem;
+      font-size: 0.8rem;
+      color: #a5a5a5;
+      display: flex;
+    }
+    .status {
+      display: block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: #00d500;
+    }
+  }
+  .actions {
+    margin-left: auto;
+    display: flex;
+    gap: 0.5rem;
+    color: #a5a5a5;
+    span>svg{
+      width: 1.5rem;
+      cursor: pointer;
+    }
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  padding: 1rem;
+  overflow: auto;
+  &>div {
+    display: flex;
+    gap: 0.5rem;
+    &.sender {
+      flex-direction: row-reverse;
+    }
+    .avatar {
+      display: flex;
+      img {
+        margin-top: auto;
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+  }
+}
+
+.footer {
+  // border-top: 1px solid $text-primary;
+  padding: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  .microphone {
+    @include center-style;
+    position: absolute;
+    top: 1.3rem;
+    left: 1.3rem;
+    background: $secondary;
+    padding: 0.5rem;
+    border-radius: 5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    cursor: pointer;
+    transition: all .2s ease;
+    &>svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: $text-secondary;
+    }
+    &.active {
+      background-color: #ff737363;
+      svg {
+        width: 1.2rem;
+        height: 1.2rem;
+        color: #ff3232;
+      }
+      &:hover {
+        background-color: #ff424263;
+      }
+    }
+  }
+  .recording {
+    position: absolute;
+    top: 2rem;
+    left: 4rem;
+    padding-left: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: $primary;
+    width: 10rem;
+    color: $text-primary;
+    span {
+      display: block;
+      width: 0.6rem;
+      height: 0.6rem;
+      background: red;
+      border-radius: 50%;
+      animation: ping .8s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+    &.hidden {
+      display: none;
+    }
+  }
+  &>input {
+    padding: 1rem;
+    border: none;
+    background: $primary;
+    border-radius: 3rem;
+    outline: none;
+    font-size: 0.8rem;
+    padding-left: 3rem;
+    padding-right: 10rem;
+    color: $text-secondary;
+    &:disabled::placeholder {
+      color: #ccc;
+    }
+  }
+  .utils {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #595959;
+    label {
+      display: flex;
+      cursor: pointer;
+      input {
+        display: none;
+      }
+      svg {
+        width: 1.5rem;
+        height: 1.5rem;
+      }
+    }
+    button {
+      border: none;
+      background: $theme;
+      color: white;
+      border-radius: 50%;
+      width: 3rem;
+      height: 3rem;
+      cursor: pointer;
+      span {
+        margin-right: .25rem;
+        svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+    }
+    .disabled {
+      color: #ccc;
+      cursor: default;
+    }
+  }
+}

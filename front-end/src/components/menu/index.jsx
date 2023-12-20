@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import socket from '../../socket'
-import './style.css'
-
+import Style from './style.module.scss'
 
 const Menu = () => {
   const [username, setUsername] = useState('')
@@ -23,14 +22,14 @@ const Menu = () => {
 
   return (
     <>
-      <div className="menu">
-        <div className="profile">
+      <div className={Style.menu}>
+        <div className={Style.profile}>
           <img src="/images/avatar.png" alt="default avatar" />
-          <div className="title">
-            <span className="name main">{username}</span>
-            <span className="bio">Front end Developer</span>
+          <div className={Style.information}>
+            <span>{username}</span>
+            <span>Front end Developer</span>
           </div>
-          <div className="edit">
+          <div className={Style.icon}>
             <span>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -38,7 +37,7 @@ const Menu = () => {
             </span>
           </div>
         </div>
-        <div className="search">
+        <div className={Style.search}>
           <span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -46,37 +45,37 @@ const Menu = () => {
           </span>
           <input type="text" placeholder="Search Friends" />
         </div>
-        <h5 className='subtitle'>Users</h5>
-        <div className="user-box">
+        <h5 className={Style.subtitle}>Users</h5>
+        <div className={Style.usersBox}>
           {users?.map(user =>
             user.username !== username &&
             <div
               key={user.id}
-              className={`user ${selectUser === user.id ? 'active_user' : ''}`}
+              className={selectUser === user.id ? Style.active : ''}
               onClick={e => selectUserHandle(user)}>
-              <div className="avatar">
+              <div className={Style.avatar}>
                 <img src="/images/avatar.png" alt="default avatar" />
                 {user.online &&
-                  <div className='status'></div>
+                  <div></div>
                 }
               </div>
-              <div className="title">
-                <span className="name">{user.username}</span>
-                <span className="bio">{user.last_message?.text ?? user.last_message?.name}</span>
+              <div className={Style.specification}>
+                <span>{user.username}</span>
+                <span>{user.last_message?.text ?? user.last_message?.name}</span>
               </div>
-              <div>
-                <span className="time">{user.last_message?.time}</span>
+              <div className={Style.detail}>
+                <span className={Style.date}>{user.last_message?.time}</span>
                 {user.last_message?.from === username &&
-                  <span className="tick_status">✔{!user.last_message?.unVisit && '✔'}</span>
+                  <span className={Style.status}>✔{!user.last_message?.unVisit && '✔'}</span>
                 }
                 {user.unVisit_count > 0 &&
-                  <span className="badge">{user.unVisit_count}</span>
+                  <span className={Style.unSeen}>{user.unVisit_count}</span>
                 }
               </div>
             </div>
           )}
         </div>
-        <h5 className='subtitle'>Groups</h5>
+        <h5 className={Style.subtitle}>Groups</h5>
       </div>
     </>
   )

@@ -1,5 +1,8 @@
+import { BsFillPauseFill } from "react-icons/bs";
+import { BsFillPlayFill } from "react-icons/bs";
 import axios from "axios"
 import { useEffect, useRef, useState } from "react"
+import Style from './style.module.scss'
 
 const VoiceMessage = ({ message, user }) => {
   const [play, setPlay] = useState(false)
@@ -11,7 +14,8 @@ const VoiceMessage = ({ message, user }) => {
 
   // change text audio duration function
   const durationTextFunc = (M, S, MD, SD) =>
-    durationRef.current.innerText = `${M}:${S < 10 ? '0' + S : S} / ${MD}:${SD < 10 ? '0' + SD : SD}`
+    durationRef.current.innerText = `${M}:${S < 10 ? '0' + S : S}`
+  // durationRef.current.innerText = `${M}:${S < 10 ? '0' + S : S} / ${MD}:${SD < 10 ? '0' + SD : SD}`
 
   // set default duration
   useEffect(() => {
@@ -102,33 +106,33 @@ const VoiceMessage = ({ message, user }) => {
 
   return (
     <>
-      <div className={message.from === user.username ? 'reciver' : 'sender'}>
+      <div className={`${Style.voice} ${message.from === user.username ? Style.reciver : Style.sender}`}>
         <audio ref={audioRef} src={voice}></audio>
-        <div className="message-voice-type">
-          <div className="progress" ref={progressRef} onClick={changeProgressHandler}></div>
-          <span onClick={() => {
+        <div className={Style.voice_message}>
+          <div>
+            <div className={`${Style.progress} ${message.from === user.username ? '' : Style.reciver}`} ref={progressRef} onClick={changeProgressHandler}></div>
+            <span className={Style.duration} ref={durationRef}></span>
+          </div>
+          <button className={message.from === user.username ? '' : Style.reciver} onClick={() => {
             if (play) puseVoiceHandler()
             else if (!voice) getVoice()
             else playVoiceHandler()
           }}>
-            {play ?
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-              </svg>
-              :
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-              </svg>
-            }
-          </span>
+            <span>
+              {play ?
+                <BsFillPauseFill />
+                :
+                <BsFillPlayFill />
+              }
+            </span>
+          </button>
         </div>
-        <div className={`time ${message.from !== user.username ? 'time_sender' : ''}`}>
-          <span className="duration" ref={durationRef}></span>
+        <div className={`${Style.time} ${message.from !== user.username ? Style.sender : ''}`}>
           <span>{message.time}</span>
+          {message.from !== user.username &&
+            <span className={Style.status}>✔{!message.unVisit && '✔'}</span>
+          }
         </div>
-        {message.from !== user.username &&
-          <span className="status">✔{!message.unVisit && '✔'}</span>
-        }
       </div>
     </>
   )
