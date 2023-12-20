@@ -237,23 +237,30 @@
   padding: 0.5rem 1rem;
   border-radius: 0.5rem 0.5rem 0.5rem 0;
   position: relative;
+  max-width: 15rem;
 }
 
 .box-message .sender .time_sender {
   margin-left: 1rem;
 }
 
+
 .box-message .reciver {
   padding: 0.5rem 1rem;
   background: blue;
   color: white;
   border-radius: 0.5rem 0.5rem 0rem 0.5rem;
+  max-width: 15rem;
 }
 
 .box-message p {
   max-width: 20rem;
   margin: 0;
   font-size: 0.9rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
 }
 
 .box-message .time {
@@ -263,6 +270,12 @@
   text-align: end;
   margin: 0;
   margin-top: 0.25rem;
+}
+
+.box-message .time .duration {
+  margin-right: 1rem;
+  color: #000;
+  font-weight: bold;
 }
 
 .box-message .reciver .time {
@@ -297,7 +310,35 @@
   cursor: pointer;
 }
 
-.box-message .voice {
+.box-message .size {
+  font-size: 0.7rem;
+  text-align: end;
+  display: block;
+  margin-top: -0.5rem;
+}
+
+/*                                      Content message types style                                   */
+.message-file-type {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-direction: row-reverse;
+}
+
+.message-file-type p {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-bottom: .3rem;
+}
+
+.message-file-type img {
+  border-radius: .5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  cursor: pointer;
+}
+
+.message-voice-type {
   display: flex;
   flex-direction: row-reverse;
   gap: 0.5rem;
@@ -305,56 +346,51 @@
   width: 15rem;
 }
 
-.box-message .voice span {
+.message-voice-type span {
   width: auto;
   height: auto;
   padding: 0.5rem;
   background: #c0c0fb;
   color: white;
   border-radius: 50%;
+  cursor: pointer;
 }
 
-.box-message .voice svg {
+.message-voice-type svg {
   display: flex;
   width: 1.5rem;
   height: 1.5rem;
   cursor: pointer;
 }
 
-.box-message .voice .progress {
+.message-voice-type .progress {
   width: 100%;
   height: 0.4rem;
   border-radius: 2rem;
   background: #c0c0fb;
   cursor: pointer;
   position: relative;
+  --progress-position: 0%;
 }
 
-.box-message .voice .progress::after {
+.message-voice-type .progress::after {
   content: '';
   position: absolute;
   top: -2.5px;
-  left: 2rem;
+  left: var(--progress-position);
   width: 0.7rem;
   height: 0.7rem;
   background: #1e1efe;
   border-radius: 50%;
 }
 
-.box-message .voice .progress::before {
+.message-voice-type .progress::before {
   content: '';
   position: absolute;
   top: 0;
   bottom: 0;
   left: 0;
-  width: 2.5rem;
+  width: calc(.5rem + var(--progress-position));
   background: #1e1efe;
   border-radius: 2rem 0 0 2rem;
-}
-
-.box-message .size {
-  font-size: 0.7rem;
-  text-align: end;
-  display: block;
-  margin-top: -0.5rem;
 }

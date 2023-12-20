@@ -5,10 +5,13 @@ const os = require('os')
 const { createServer } = require('http')
 
 const express = require('express')
+const bodyParser = require('body-parser')
 const { Server } = require('socket.io')
 const { v4: uuidV4 } = require('uuid')
 
 const { AccessControllers } = require('./middleware/headers')
+const ChatRouter = require('./routes/chat.route')
+const { rootDir } = require('./helpers/rootDir')
 
 const app = express()
 const server = createServer(app)
@@ -20,6 +23,7 @@ const io = new Server(server, {
 })
 
 app.use(AccessControllers)
+// app.use(bodyParser.urlencoded({ extended: false }))
 
 // app.use(express.static('public'))
 app.use(express.static(path.join(__dirname, 'public')))
@@ -69,6 +73,7 @@ const chatNS = io.of('/chat')
 chatNS.on('connection', socket => {
 
   let userName
+  const inChat = UN => users_active_page[UN]?.username === userName
 
   const getUsersHandler = () => {
     users.forEach(user => {
@@ -162,13 +167,12 @@ chatNS.on('connection', socket => {
     })
     if (findToken) {
       const mySelect = users_active_page[userName]?.username
-      const inChat = users_active_page[mySelect]?.username === userName
 
       let findMessages = messages_array.find(messages => messages.id === findToken.id)
       let filterMessages = messages_array.filter(messages => messages.id !== findToken.id)
 
       let changed = findMessages.messages?.map(message => {
-        if (message.unVisit === userName || inChat) {
+        if (message.unVisit === userName || inChat(mySelect)) {
           message.unVisit = false
         }
 
@@ -182,19 +186,10 @@ chatNS.on('connection', socket => {
 
       messages_array = filterMessages
 
-      const message_array = changed.map(mess => {
-        if (mess.type === 'File')
-          mess.file = fs.readFileSync(path.join('public', 'uploads', mess.path))
-        else if (mess.type === 'Voice')
-          mess.voice = fs.readFileSync(path.join('public', 'voices', mess.path))
+      chatNS.to(socket.id).emit('messages_user', changed)
 
-        return mess
-      })
-
-      chatNS.to(socket.id).emit('messages_user', message_array)
-
-      if (inChat) {
-        chatNS.to(users_active_page[userName]?.id).emit('messages_user', message_array)
+      if (inChat(mySelect)) {
+        chatNS.to(users_active_page[userName]?.id).emit('messages_user', changed)
       }
 
     } else {
@@ -204,19 +199,7 @@ chatNS.on('connection', socket => {
     getUsersHandler()
   }
 
-  const saveFileHandler = async (name, file, savePath) => {
-    const splitN = name.split(".")
-    const format = splitN[splitN.length - 1]
-    const joinN = splitN.filter(s => s !== format).join('.')
-    const newN = `${joinN}&&${uuidV4()}.${format}`
-    try {
-      await fs.writeFileSync(path.join(__dirname, 'public', ...savePath, newN), file)
-      return newN
-    } catch (error) {
-      console.log(error)
-      return ''
-    }
-  }
+  app.use('/chat/send_message', ChatRouter)
 
   socket.on('send_message', async data => {
     let findToken = tokens?.find(tok => {
@@ -225,32 +208,12 @@ chatNS.on('connection', socket => {
         return tok
     })
 
-    const inChat = users_active_page[data.to]?.username === userName
-
     let newMessage = {
       id: uuidV4(),
-      type: data.type,
       from: userName,
-      to: data.to,
       time: new Date().toLocaleTimeString(),
-      unVisit: inChat ? false : data.to
-    }
-
-    switch (data.type) {
-      case 'Message':
-        newMessage.text = data.message
-        break
-      case 'File':
-        newMessage.name = data.name
-        newMessage.path = await saveFileHandler(data.name, data.file, ['uploads'])
-        newMessage.file_type = data.file_type
-        break
-      case 'Voice':
-        newMessage.path = await saveFileHandler(`${userName}.wav`, data.voice, ['voices'])
-        break
-
-      default:
-        break;
+      unVisit: inChat(data.to) ? false : data.to,
+      ...data
     }
 
     if (findToken) {
@@ -267,17 +230,9 @@ chatNS.on('connection', socket => {
     returnMessages()
   })
 
-  socket.on('voice_message', data => {
-    fs.writeFile(path.join(__dirname, 'public', 'voices', 'ex.wav'), data, (err) => {
-      if (err)
-        console.log(err)
-    })
-  })
-
   socket.on('typing', type => {
-    const mySelect = users_active_page[userName]
-    const inChat = users_active_page[mySelect?.username]?.username === userName
-    if (inChat) {
+    const mySelect = users_active_page[userName]?.username
+    if (inChat(mySelect)) {
       chatNS.to(mySelect?.id).emit('user_typing', type)
     }
   })

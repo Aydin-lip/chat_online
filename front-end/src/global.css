@@ -3,6 +3,10 @@ body {
   margin: 0;
 }
 
-*{
+* {
   font-family: cursive;
+}
+
+.hidden {
+  display: none !important;
 }

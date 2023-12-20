@@ -6,6 +6,7 @@ import { FaPaperPlane } from "react-icons/fa";
 import { MdOutlineKeyboardVoice } from "react-icons/md";
 import { useEffect, useMemo, useRef, useState } from "react"
 import socket from "../../socket"
+import httpService from "../../services/http.services";
 
 const ChatFooter = ({ data }) => {
   const [message, setMessage] = useState("")
@@ -13,6 +14,9 @@ const ChatFooter = ({ data }) => {
 
   const fileRef = useRef()
   const recordingTime = useRef()
+  const microphoneRef = useRef()
+  const sendBtnRef = useRef()
+
 
   const sendMessageHandle = (type, send_data) => {
     socket.emit('typing', false)
@@ -23,21 +27,35 @@ const ChatFooter = ({ data }) => {
     if (type === 'Message') {
       socket.emit('send_message', {
         ...newMessage,
-        message: message,
+        text: message,
       })
       setMessage('')
     } else if (type === 'File') {
-      socket.emit('send_message', {
-        ...newMessage,
-        name: send_data.name,
-        file: send_data.file,
-        file_type: send_data.file.type
-      })
+      const formData = new FormData()
+      formData.append('file', send_data)
+
+      httpService.post(`chat/send_message/file`, formData)
+        .then(({ data }) => {
+          socket.emit('send_message', {
+            ...newMessage,
+            name: data.name,
+            path: data.path
+          })
+        })
+        .catch(err => console.log(err))
     } else if (type === 'Voice') {
-      socket.emit('send_message', {
-        ...newMessage,
-        voice: send_data,
-      })
+      const formData = new FormData()
+      formData.append('voice', send_data.data)
+
+      httpService.post(`chat/send_message/voice`, formData)
+        .then(({ data }) => {
+          socket.emit('send_message', {
+            ...newMessage,
+            path: data.path,
+            duration: send_data.duration
+          })
+        })
+        .catch(err => console.log(err))
     }
   }
 
@@ -45,14 +63,14 @@ const ChatFooter = ({ data }) => {
   useEffect(() => {
     let recordingTimer
 
+    let min = 0
+    let second = 0
+    let h_second = 0
+
     if (!recording) {
       clearInterval(recordingTimer)
       return
     }
-
-    let min = 0
-    let second = 0
-    let h_second = 0
 
     recordingTimer = setInterval(() => {
       if (h_second === 100) {
@@ -71,15 +89,24 @@ const ChatFooter = ({ data }) => {
       recordingTime.current.innerText = `${min}:${second < 10 ? '0' + second : second}, ${h_second < 10 ? '0' + h_second : h_second}`
     }, 10);
 
+    const keyDownHandler = e => {
+      if ((e.keyCode === 13) && recording) {
+        sendBtnRef.current.click()
+      }
+    }
+
+    window.addEventListener('keydown', keyDownHandler)
+
     return () => {
       clearInterval(recordingTimer)
+      window.removeEventListener('keydown', keyDownHandler)
     }
   }, [recording])
 
   // Recording voice and send
   useEffect(() => {
-    const microphone = document.querySelector('.microphone')
-    const sendBtn = document.querySelector('.send-btn')
+    const microphone = microphoneRef.current
+    const sendBtn = sendBtnRef.current
 
     let audioStream;
 
@@ -89,8 +116,10 @@ const ChatFooter = ({ data }) => {
       audioStream?.stop()
       audioStream.ondataavailable = e => {
         if (event) {
-          // socket.emit('voice_message', e.data)
-          sendMessageHandle('Voice', e.data)
+          const stringTime = recordingTime.current.innerText?.split(',')[0]
+          const sTimeSplit = stringTime.split(':')
+          const objTime = { min: Number(sTimeSplit[0]), second: Number(sTimeSplit[1]) }
+          sendMessageHandle('Voice', { data: e.data, duration: objTime })
         }
       }
       audioStream = null
@@ -119,8 +148,8 @@ const ChatFooter = ({ data }) => {
     sendBtn.addEventListener('click', sendVoiceHandle)
 
     return () => {
-      microphone.addEventListener('click', voiceMessageHandle)
-      sendBtn.addEventListener('click', sendVoiceHandle)
+      microphone.removeEventListener('click', voiceMessageHandle)
+      sendBtn.removeEventListener('click', sendVoiceHandle)
     }
   }, [])
 
@@ -152,27 +181,27 @@ const ChatFooter = ({ data }) => {
   }
 
   const selectFileHandle = e => {
-    const file = e.target.files[0]
-    sendMessageHandle('File', { name: file.name, file })
+    if (e.target.files[0])
+      sendMessageHandle('File', e.target.files[0])
     fileRef.current = ''
   }
 
   return (
     <>
       <form className='footer' onSubmit={submitFormHandler} >
-        <span className={`microphone ${recording ? 'active-mic' : ''}`} >
+        <span className={`microphone ${recording ? 'active-mic' : ''}`} ref={microphoneRef}>
           {recording ?
             <FaTrash />
             :
             <MdOutlineKeyboardVoice />
           }
         </span>
-        {recording &&
-          <div className="recording">
-            <span></span>
-            <div ref={recordingTime}></div>
-          </div>
-        }
+
+        <div className={`recording ${!recording ? 'hidden' : ''}`}>
+          <span></span>
+          <div ref={recordingTime}></div>
+        </div>
+
         <input type='text' placeholder='Write Something' value={message} onChange={changeMessageHandle} disabled={recording} />
         <div className='utils'>
           <label className={recording ? 'disabled' : ''} htmlFor="send-file">
@@ -186,7 +215,7 @@ const ChatFooter = ({ data }) => {
           <label className={recording ? 'disabled' : ''} htmlFor="">
             <GrEmoji strokeWidth={.5} />
           </label >
-          <button type="submit" className="send-btn">
+          <button type="submit" className="send-btn" ref={sendBtnRef}>
             <span>
               <FaPaperPlane />
             </span>
