@@ -116,13 +116,7 @@ chatNS.on('connection', socket => {
     getUsersHandler()
   })
 
-  socket.on('select_chat', user => {
-    let findUser = users.find(u => u.id === user.id)
-    users_active_page[userName] = findUser
-
-    chatNS.to(socket.id).emit('get_user', findUser)
-
-
+  const sendUsersStatus = () => {
     let activeUser = []
     for (let i = 0; i < users.length; i++) {
 
@@ -155,7 +149,15 @@ chatNS.on('connection', socket => {
     deactive?.map(id => {
       chatNS.to(id).emit('status', false)
     })
+  }
 
+  socket.on('select_chat', user => {
+    let findUser = users.find(u => u.id === user.id)
+    users_active_page[userName] = findUser
+
+    chatNS.to(socket.id).emit('get_user', findUser)
+
+    sendUsersStatus()
     returnMessages()
   })
 
@@ -240,6 +242,7 @@ chatNS.on('connection', socket => {
   socket.on('disconnect', () => {
     delete users_active_page[userName]
     users = users.map(user => user.id === socket.id ? { ...user, online: false } : user)
+    sendUsersStatus()
     getUsersHandler()
   })
 

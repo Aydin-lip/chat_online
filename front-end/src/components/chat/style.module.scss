@@ -7,7 +7,7 @@
 }
 
 .chatScreen {
-  width: calc(100% - 570px);
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -94,112 +94,150 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  .microphone {
-    @include center-style;
-    position: absolute;
-    top: 1.3rem;
-    left: 1.3rem;
-    background: $secondary;
-    padding: 0.5rem;
-    border-radius: 5rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    cursor: pointer;
-    transition: all .2s ease;
-    &>svg {
-      width: 1.5rem;
-      height: 1.5rem;
-      color: $text-secondary;
-    }
-    &.active {
-      background-color: #ff737363;
-      svg {
-        width: 1.2rem;
-        height: 1.2rem;
-        color: #ff3232;
-      }
-      &:hover {
-        background-color: #ff424263;
-      }
-    }
-  }
-  .recording {
-    position: absolute;
-    top: 2rem;
-    left: 4rem;
-    padding-left: 0.5rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    background: $primary;
-    width: 10rem;
-    color: $text-primary;
-    span {
-      display: block;
-      width: 0.6rem;
-      height: 0.6rem;
-      background: red;
-      border-radius: 50%;
-      animation: ping .8s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-    &.hidden {
-      display: none;
-    }
-  }
-  &>input {
-    padding: 1rem;
-    border: none;
+  .send_message {
     background: $primary;
     border-radius: 3rem;
-    outline: none;
-    font-size: 0.8rem;
+    padding: 1rem;
     padding-left: 3rem;
     padding-right: 10rem;
-    color: $text-secondary;
-    &:disabled::placeholder {
-      color: #ccc;
-    }
-  }
-  .utils {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #595959;
-    label {
-      display: flex;
+    .microphone {
+      @include center-style;
+      position: absolute;
+      bottom: 1.3rem;
+      left: 1.3rem;
+      background: $secondary;
+      padding: 0.5rem;
+      border-radius: 5rem;
+      width: 1.5rem;
+      height: 1.5rem;
       cursor: pointer;
-      input {
-        display: none;
-      }
-      svg {
+      transition: all .2s ease;
+      &>svg {
         width: 1.5rem;
         height: 1.5rem;
+        color: $text-secondary;
+      }
+      &.active {
+        background-color: #ff737363;
+        svg {
+          width: 1.2rem;
+          height: 1.2rem;
+          color: #ff3232;
+        }
+        &:hover {
+          background-color: #ff424263;
+        }
       }
     }
-    button {
-      border: none;
-      background: $theme;
-      color: white;
-      border-radius: 50%;
-      width: 3rem;
-      height: 3rem;
-      cursor: pointer;
+    .recording {
+      position: absolute;
+      z-index: 1;
+      top: 2rem;
+      left: 4rem;
+      padding-left: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      background: $primary;
+      width: 10rem;
+      color: $text-primary;
       span {
-        margin-right: .25rem;
+        display: block;
+        width: 0.6rem;
+        height: 0.6rem;
+        background: red;
+        border-radius: 50%;
+        animation: ping .8s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+      &.hidden {
+        display: none;
+      }
+    }
+    .messageBox {
+      width: 100%;
+      transition: all ease .2s;
+      max-height: 15rem;
+      overflow: auto;
+      position: relative;
+      &>span {
+        color: $text-primary;
+        font-size: .8rem;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transition: all ease .2s;
+        &.hidden {
+          left: 3rem;
+          opacity: 0;
+        }
+      }
+      &>div {
+        width: 100%;
+        word-break: break-word;
+        font-size: .8rem;
+        // background-color: $primary;
+        color: $text-secondary;
+        outline: none;
+        position: relative;
+      }
+      textarea {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        background: $primary;
+        color: $text-secondary;
+        border: none;
+        resize: none;
+        outline: none;
+        font-size: 0.8rem;
+        &:disabled::placeholder {
+          color: #ccc;
+        }
+      }
+    }
+    .utils {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: $text-primary;
+      label {
+        display: flex;
+        cursor: pointer;
+        input {
+          display: none;
+        }
         svg {
           width: 1.5rem;
           height: 1.5rem;
         }
       }
-    }
-    .disabled {
-      color: #ccc;
-      cursor: default;
+      button {
+        border: none;
+        background: $theme;
+        color: white;
+        border-radius: 50%;
+        width: 3rem;
+        height: 3rem;
+        cursor: pointer;
+        span {
+          margin-right: .25rem;
+          svg {
+            width: 1.5rem;
+            height: 1.5rem;
+          }
+        }
+      }
+      .disabled {
+        // color: $text-tertiary;
+        opacity: .7;
+        cursor: default;
+      }
     }
   }
 }

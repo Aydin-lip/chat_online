@@ -47,11 +47,11 @@
   max-width: 20rem;
   margin: 0;
   font-size: 0.9rem;
+  color: $text-secondary;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
-  color: $text-secondary;
 }
 
 .voice {
@@ -148,7 +148,11 @@
   @include reciver_sender-styles;
   .text_message {
     p {
-      @include p-style;
+      max-width: 20rem;
+      margin: 0;
+      font-size: 0.9rem;
+      color: $text-secondary;
+      word-wrap: break-word
     }
   }
   .time {
