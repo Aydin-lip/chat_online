@@ -1,18 +1,19 @@
-require('dotenv').config()
-const path = require('path')
-const fs = require('fs')
-const os = require('os')
-const { createServer } = require('http')
+import dotenv from 'dotenv'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { createServer } from 'http'
 
-const express = require('express')
-const bodyParser = require('body-parser')
-const { Server } = require('socket.io')
-const { v4: uuidV4 } = require('uuid')
+import express from 'express'
+import { Server } from 'socket.io'
+import { v4 as uuidV4 } from 'uuid'
 
-const { AccessControllers } = require('./middleware/headers')
-const ChatRouter = require('./routes/chat.route')
-const { rootDir } = require('./helpers/rootDir')
+import { AccessControllers } from './middleware/headers.js'
+import ChatRouter from './routes/chat.route.js'
+import sequelize from './db/mysql.js'
+import { ChatsDB, MessagesDB, GroupsDB, UsersDB } from './db/models/index.js'
 
+dotenv.config()
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express()
 const server = createServer(app)
 const io = new Server(server, {
@@ -71,7 +72,7 @@ let messages_array = [
 const chatNS = io.of('/chat')
 
 chatNS.on('connection', socket => {
-
+  console.log('connected userrrrrrrr')
   let userName
   const inChat = UN => users_active_page[UN]?.username === userName
 
@@ -249,6 +250,12 @@ chatNS.on('connection', socket => {
 })
 
 const port = process.env.PORT || 8008
+
+sequelize.sync()
+  .then(res => {
+    console.log('Connected to database :)')
+  }).catch(err => console.log(err))
+
 server.listen(port, () => {
   console.log(`Server is running in PORT ${port}`)
 })

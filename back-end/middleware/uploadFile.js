@@ -1,10 +1,10 @@
-const multer = require('multer')
-const { rootDir } = require('../helpers/rootDir')
-const { v4: uuidV4 } = require('uuid')
+import multer from 'multer'
+import { RootDir } from '../helpers/rootDir.js'
+import { v4 as uuidV4 } from 'uuid'
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, rootDir(['public', req.uploadFilePath]))
+    cb(null, RootDir(['public', req.uploadFilePath]))
   },
   filename: (req, file, cb) => {
     if (req.uploadFilePath === 'voices') return cb(null, `${uuidV4()}.wav`)
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
   },
 })
 
-exports.uploadFile = multer({
+export const UploadFile = multer({
   storage,
   // fileFilter: (req, file, cb) => {
   //   const fileSize = parseInt(req.headers["content-length"])

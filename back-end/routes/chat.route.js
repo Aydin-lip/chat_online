@@ -1,12 +1,12 @@
-const { Router } = require("express")
-const { uploadFile } = require('../middleware/uploadFile')
+import { Router } from "express"
+import { UploadFile } from '../middleware/uploadFile.js'
 
 const ChatRouter = Router()
 
 ChatRouter.post('/file', (req, res, next) => {
   req.uploadFilePath = 'uploads'
   next()
-}, uploadFile.single('file'), (req, res, next) => {
+}, UploadFile.single('file'), (req, res, next) => {
   res.status(200).send({ name: req.file?.originalname, path: `http://192.168.10.19:8080/uploads/${req.file?.filename}` })
   next()
 })
@@ -14,9 +14,9 @@ ChatRouter.post('/file', (req, res, next) => {
 ChatRouter.post('/voice', (req, res, next) => {
   req.uploadFilePath = 'voices'
   next()
-}, uploadFile.single('voice'), (req, res, next) => {
+}, UploadFile.single('voice'), (req, res, next) => {
   res.status(200).send({ path: `http://192.168.10.19:8080/voices/${req.file?.filename}` })
   next()
 })
 
-module.exports = ChatRouter
+export default ChatRouter
