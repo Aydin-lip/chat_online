@@ -1,23 +1,22 @@
 import { DataTypes } from 'sequelize'
 import sequelize from "../mysql.js";
 
-const ChatsDB = sequelize.define('chat', {
+const OnlineUsersDB = sequelize.define('online_user', {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true,
     autoIncrement: true
   },
-  user_1: {
+  user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  user_2: {
+  chat_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
   }
 })
 
 // User.hasMany(Message, { foreignKey: 'username', onDelete: 'CASCADE', onUpdate: 'CASCADE' })
 
-export default ChatsDB
+export default OnlineUsersDB

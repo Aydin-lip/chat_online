@@ -88,7 +88,7 @@ const UsersDB = sequelize.define('user', {
   avatar: {
     type: DataTypes.JSON,
   },
-  last_name: {
+  last_seen: {
     type: DataTypes.DATE
   }
 })

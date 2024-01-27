@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize'
 import sequelize from "../mysql.js";
 
-const MessagesDB = sequelize.define('Message', {
+const MessagesDB = sequelize.define('message', {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,

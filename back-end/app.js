@@ -10,7 +10,9 @@ import { v4 as uuidV4 } from 'uuid'
 import { AccessControllers } from './middleware/headers.js'
 import ChatRouter from './routes/chat.route.js'
 import sequelize from './db/mysql.js'
-import { ChatsDB, MessagesDB, GroupsDB, UsersDB } from './db/models/index.js'
+import { ChatsDB, MessagesDB, GroupsDB, UsersDB, OnlineUsersDB } from './db/models/index.js'
+import Authorization from './middleware/authorization.js'
+import { SignIn, SignUp } from './controllers/index.js'
 
 dotenv.config()
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -28,11 +30,6 @@ app.use(AccessControllers)
 
 // app.use(express.static('public'))
 app.use(express.static(path.join(__dirname, 'public')))
-
-io.use((socket, next) => {
-  // console.log(socket.request.headers.authorization)
-  next()
-})
 
 let users = [
   // {
@@ -69,10 +66,27 @@ let messages_array = [
   // }
 ]
 
-const chatNS = io.of('/chat')
+// import bcrypt from 'bcryptjs'
+// app.get('/create-password', async (req, res) => {
+//   const pass = req.query.password
+//   const salt = process.env.SALT_BCRYPT
+//   const passHash = await bcrypt.hash(pass, Number(salt))
+//   res.status(200).send(passHash)
+// })
 
-chatNS.on('connection', socket => {
-  console.log('connected userrrrrrrr')
+// import jwt from 'jsonwebtoken'
+// app.get('/crate-token', (req, res) => {
+//   const token = jwt.sign({ user_id: 1 }, process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM, expiresIn: '1h' })
+//   res.status(200).send(token)
+// })
+
+io.on('connection', socket => {
+
+  // io.on('Sign-Up', SignUp)
+  // io.on('Sign-In', SignIn)
+
+  io.use(Authorization)
+
   let userName
   const inChat = UN => users_active_page[UN]?.username === userName
 
@@ -102,7 +116,7 @@ chatNS.on('connection', socket => {
         return obj_user
       })
 
-      chatNS.to(user.id).emit('users', allUsers)
+      io.to(user.id).emit('users', allUsers)
     })
   }
 
@@ -112,7 +126,7 @@ chatNS.on('connection', socket => {
     filterUsers.push({ id: socket.id, username: nickname, online: true })
     users = filterUsers
 
-    chatNS.to(socket.id).emit('nick_name', nickname)
+    io.to(socket.id).emit('nick_name', nickname)
 
     getUsersHandler()
   })
@@ -140,7 +154,7 @@ chatNS.on('connection', socket => {
     }
 
     activeUser?.map(user => {
-      chatNS.to(user.id).emit('status', true)
+      io.to(user.id).emit('status', true)
     })
 
     const active_users_id = activeUser.map(user => user.id)
@@ -148,7 +162,7 @@ chatNS.on('connection', socket => {
     const deactive = users_id.filter(id => !active_users_id.includes(id) && id)
 
     deactive?.map(id => {
-      chatNS.to(id).emit('status', false)
+      io.to(id).emit('status', false)
     })
   }
 
@@ -156,7 +170,7 @@ chatNS.on('connection', socket => {
     let findUser = users.find(u => u.id === user.id)
     users_active_page[userName] = findUser
 
-    chatNS.to(socket.id).emit('get_user', findUser)
+    io.to(socket.id).emit('get_user', findUser)
 
     sendUsersStatus()
     returnMessages()
@@ -189,14 +203,14 @@ chatNS.on('connection', socket => {
 
       messages_array = filterMessages
 
-      chatNS.to(socket.id).emit('messages_user', changed)
+      io.to(socket.id).emit('messages_user', changed)
 
       if (inChat(mySelect)) {
-        chatNS.to(users_active_page[userName]?.id).emit('messages_user', changed)
+        io.to(users_active_page[userName]?.id).emit('messages_user', changed)
       }
 
     } else {
-      chatNS.to(socket.id).emit('messages_user', [])
+      io.to(socket.id).emit('messages_user', [])
     }
 
     getUsersHandler()
@@ -236,7 +250,7 @@ chatNS.on('connection', socket => {
   socket.on('typing', type => {
     const mySelect = users_active_page[userName]?.username
     if (inChat(mySelect)) {
-      chatNS.to(mySelect?.id).emit('user_typing', type)
+      io.to(mySelect?.id).emit('user_typing', type)
     }
   })
 
