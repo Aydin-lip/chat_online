@@ -16,7 +16,7 @@ class UsersMD {
   }
 
   async register(callback) {
-    const passHash = await bcrypt.hash(this.password, process.env.SALT_BCRYPT)
+    const passHash = await bcrypt.hash(this.password, +process.env.SALT_BCRYPT)
     UsersDB.create({ ...this, password: passHash })
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
@@ -32,7 +32,7 @@ class UsersMD {
       }
     })
       .then(async ({ dataValues }) => {
-        const matchPass = await bcrypt.compare(this.password, dataValues)
+        const matchPass = await bcrypt.compare(this.password, dataValues.password)
         if (matchPass) {
           callback(dataValues)
         } else {
@@ -54,7 +54,7 @@ class UsersMD {
       .then(async ({ dataValues }) => {
         const matchPass = await bcrypt.compare(oldPassword, dataValues.password)
         if (matchPass) {
-          const passHash = await bcrypt.compare(newPassword, process.env.SALT_BCRYPT)
+          const passHash = await bcrypt.compare(newPassword, +process.env.SALT_BCRYPT)
           UsersDB.update({ password: passHash }, { where: { id } })
             .then(res => callback(res))
             .catch(err => callback(null, err))

@@ -82,10 +82,11 @@ let messages_array = [
 
 io.on('connection', socket => {
 
-  // io.on('Sign-Up', SignUp)
-  // io.on('Sign-In', SignIn)
+  socket.on('Sign-Up', value => SignUp(value, socket))
+  socket.on('Sign-In', value => SignIn(value, socket))
 
-  io.use(Authorization)
+  socket.use((event, next) => Authorization(event, next, socket))
+
 
   let userName
   const inChat = UN => users_active_page[UN]?.username === userName
