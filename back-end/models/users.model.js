@@ -26,8 +26,8 @@ class UsersMD {
     UsersDB.findOne({
       where: {
         [Op.or]: [
-          { username: this.username },
-          { phone: this.phone }
+          { username: this.username ?? '' },
+          { phone: this.phone ?? '' }
         ]
       }
     })

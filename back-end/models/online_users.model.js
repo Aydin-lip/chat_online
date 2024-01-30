@@ -1,10 +1,10 @@
 import { OnlineUsersDB } from "../db/models/index.js"
 
 class OnlineUsersMD {
-  
+
   static async add(user_id, callback) {
     OnlineUsersDB.create({ user_id })
-      .then(res => callback(res))
+      .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }
 
@@ -15,7 +15,7 @@ class OnlineUsersMD {
   }
 
   static delete(user_id, callback) {
-    OnlineUsersDB.destroy({ user_id })
+    OnlineUsersDB.destroy({ where: { user_id } })
       .then(res => callback(res))
       .catch(err => callback(null, err))
   }

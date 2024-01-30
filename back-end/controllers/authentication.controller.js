@@ -5,39 +5,39 @@ import { SignInValidation, SingUpValidation } from "../validations/users.validat
 
 dot.config()
 
-const SignIn = (value, socket) => {
-  SignInValidation.validate(value, { abortEarly: false })
-    .then(res => {
-      const User = new UsersMD(value)
-      User.login((ress, err) => {
+const SignIn = (req, res) => {
+  SignInValidation.validate(req.body, { abortEarly: false })
+    .then(resV => {
+      const User = new UsersMD(req.body)
+      User.login((resU, err) => {
         if (!err) {
-          const token = jwt.sign({ user_id: ress.id }, process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM })
-          socket.emit('Sign-In', { ...ress, token })
+          const token = jwt.sign({ user_id: resU.id }, process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM })
+          res.status(200).send({ ...resU, token })
         } else {
-          socket.emit('error', { path: 'Sign-In', status: 400, message: 'Error database!', error: err.message })
+          res.status(400).send({ message: 'Error database!', error: err.message })
         }
       })
     })
     .catch(err => {
-      socket.emit('error', { path: 'Sign-In', status: 412, message: 'Error message for validation', error: err.errors })
+      res.status(412).send({ message: 'Error message for validation', error: err.errors })
     })
 }
 
-const SignUp = (value, socket) => {
-  SingUpValidation.validate(value, { abortEarly: false })
-    .then(res => {
-      const User = new UsersMD(value)
-      User.register((ress, err) => {
+const SignUp = (req, res) => {
+  SingUpValidation.validate(req.body, { abortEarly: false })
+    .then(resV => {
+      const User = new UsersMD(req.body)
+      User.register((resU, err) => {
         if (!err) {
-          const token = jwt.sign({ user_id: ress.id }, process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM })
-          socket.emit('Sign-Up', { ...ress, token })
+          const token = jwt.sign({ user_id: resU.id }, process.env.JWT_SECRET, { algorithm: process.env.JWT_ALGORITHM })
+          res.status(200).send({ ...resU, token })
         } else {
-          socket.emit('error', { path: 'Sign-Up', status: 400, message: 'Error database!', error: err.message })
+          res.status(400).send({ message: 'Error database!', error: err.message })
         }
       })
     })
     .catch(err => {
-      socket.emit('error', { path: 'Sign-Up', status: 412, message: 'Error message for validation', error: err.errors })
+      res.status(412).send({ message: 'Error message for validation', error: err.errors })
     })
 }
 

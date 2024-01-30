@@ -13,6 +13,9 @@ import sequelize from './db/mysql.js'
 import { ChatsDB, MessagesDB, GroupsDB, UsersDB, OnlineUsersDB } from './db/models/index.js'
 import Authorization from './middleware/authorization.js'
 import { SignIn, SignUp } from './controllers/index.js'
+import bodyParser from 'body-parser'
+import OnlineUsersMD from './models/online_users.model.js'
+import UsersMD from './models/users.model.js'
 
 dotenv.config()
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -26,10 +29,12 @@ const io = new Server(server, {
 })
 
 app.use(AccessControllers)
-// app.use(bodyParser.urlencoded({ extended: false }))
 
 // app.use(express.static('public'))
 app.use(express.static(path.join(__dirname, 'public')))
+
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
 let users = [
   // {
@@ -80,13 +85,27 @@ let messages_array = [
 //   res.status(200).send(token)
 // })
 
-io.on('connection', socket => {
+app.post('/Sign_Up', SignUp)
+app.post('/Sign_In', SignIn)
 
-  socket.on('Sign-Up', value => SignUp(value, socket))
-  socket.on('Sign-In', value => SignIn(value, socket))
+io.use(Authorization).on('connection', socket => {
+  OnlineUsersMD.add(socket.user?.id, (res, err) => {
+    if (err) console.log('error online_users connection: ', err)
+    else console.log('user connected user_id:', res?.user_id)
+  })
 
-  socket.use((event, next) => Authorization(event, next, socket))
+  socket.on('disconnect', () => {
+    OnlineUsersMD.delete(socket.user?.id, (res, err) => {
+      if (err) console.log('error online_users disconnection: ', err)
+      else console.log('user disconnected user_id:', socket.user?.id)
+    })
+    UsersMD.lastSeen(socket.user?.id, (res, err) => {
+      if (err) console.log('error update last_seen: ', err)
+      else console.log('user last_seen success updated: ', res)
+    })
+  })
 
+  
 
   let userName
   const inChat = UN => users_active_page[UN]?.username === userName
@@ -255,12 +274,12 @@ io.on('connection', socket => {
     }
   })
 
-  socket.on('disconnect', () => {
-    delete users_active_page[userName]
-    users = users.map(user => user.id === socket.id ? { ...user, online: false } : user)
-    sendUsersStatus()
-    getUsersHandler()
-  })
+  // socket.on('disconnect', () => {
+  //   delete users_active_page[userName]
+  //   users = users.map(user => user.id === socket.id ? { ...user, online: false } : user)
+  //   sendUsersStatus()
+  //   getUsersHandler()
+  // })
 
 })
 
