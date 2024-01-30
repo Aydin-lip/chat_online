@@ -12,10 +12,11 @@ import ChatRouter from './routes/chat.route.js'
 import sequelize from './db/mysql.js'
 import { ChatsDB, MessagesDB, GroupsDB, UsersDB, OnlineUsersDB } from './db/models/index.js'
 import Authorization from './middleware/authorization.js'
-import { SignIn, SignUp } from './controllers/index.js'
+import { Connect, Disconnect, SignIn, SignUp } from './controllers/index.js'
 import bodyParser from 'body-parser'
 import OnlineUsersMD from './models/online_users.model.js'
 import UsersMD from './models/users.model.js'
+import ChatsMD from './models/chats.model.js'
 
 dotenv.config()
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -89,23 +90,14 @@ app.post('/Sign_Up', SignUp)
 app.post('/Sign_In', SignIn)
 
 io.use(Authorization).on('connection', socket => {
-  OnlineUsersMD.add(socket.user?.id, (res, err) => {
-    if (err) console.log('error online_users connection: ', err)
-    else console.log('user connected user_id:', res?.user_id)
-  })
+  Connect(socket)
 
-  socket.on('disconnect', () => {
-    OnlineUsersMD.delete(socket.user?.id, (res, err) => {
-      if (err) console.log('error online_users disconnection: ', err)
-      else console.log('user disconnected user_id:', socket.user?.id)
-    })
-    UsersMD.lastSeen(socket.user?.id, (res, err) => {
-      if (err) console.log('error update last_seen: ', err)
-      else console.log('user last_seen success updated: ', res)
-    })
-  })
+  socket.on('disconnect', () => Disconnect(socket))
 
-  
+  socket.emit('Get_Info', socket.user)
+
+
+
 
   let userName
   const inChat = UN => users_active_page[UN]?.username === userName

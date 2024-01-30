@@ -86,6 +86,16 @@ class UsersMD {
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }
+
+  static getUserProfileChat(id, callback) {
+    UsersDB.findOne({ 
+      where: { id },
+      attributes: ['firstname', 'lastname', 'avatar']
+     })
+      .then(({ dataValues }) => callback(dataValues))
+      .catch(err => callback(null, err))
+  }
+
 }
 
 export default UsersMD

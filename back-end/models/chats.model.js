@@ -1,4 +1,7 @@
-import { ChatsDB } from "../db/models/index.js";
+import { Op } from 'sequelize'
+
+import { ChatsDB, UsersDB } from "../db/models/index.js";
+
 
 class ChatsMD {
   constructor({ user_1, user_2 }) {
