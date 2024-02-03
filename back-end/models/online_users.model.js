@@ -9,9 +9,9 @@ class OnlineUsersMD {
   }
 
   static selectChat(user_id, chat_id, callback) {
-    OnlineUsersDB.update({ user_id }, { where: { chat_id } })
-      .then(res => callback(res))
-      .catch(err => callback(null, err))
+    OnlineUsersDB.update({ chat_id }, { where: { user_id } })
+      .then(res => callback?.(res))
+      .catch(err => callback?.(null, err))
   }
 
   static delete(user_id, callback) {

@@ -7,8 +7,8 @@ import { MessagesDB, UsersDB } from "../db/models/index.js"
 // }
 
 class MessagesMD {
-  constructor({ ref_id, user_id, is_group, type, path, name, description, size, time, text }) {
-    const values = { ref_id, user_id, is_group, type, path, name, description, size, time, text }
+  constructor({ ref_id, user_id, type, path, name, description, size, time, text }) {
+    const values = { ref_id, user_id, type, path, name, description, size, time, text }
     Object.entries(values).forEach(([k, v]) => {
       if (v && (v || v.length >= 0))
         this[k] = v
@@ -45,7 +45,7 @@ class MessagesMD {
 
     MessagesDB.findOne({
       where: { id },
-      order: ['id', 'DESC'],
+      order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize,
     })
@@ -53,12 +53,12 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static getByUserId(user_id, option, callback) {
+  static getByUserUserId(user_id, option, callback) {
     const { page = 1, pageSize = 20 } = option
 
     MessagesDB.findAll({
       where: { user_id },
-      order: ['id', 'DESC'],
+      order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
     })
@@ -66,22 +66,22 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static getByRefId(ref_id, is_group, option, callback) {
+  static getByRefId(ref_id, option, callback) {
     const { page = 1, pageSize = 20 } = option
 
     MessagesDB.findAll({
-      where: { ref_id, is_group },
-      order: ['id', 'DESC'],
+      where: { ref_id },
+      order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
     })
-      .then(({ dataValues }) => callback(dataValues))
+      .then(res => callback(res.map(r => r?.dataValues)))
       .catch(err => callback(null, err))
   }
 
-  static async getByRefIdLast(ref_id, is_group = false, callback) {
+  static async getByRefIdLast(ref_id, callback) {
     return await MessagesDB.findAll({
-      where: { ref_id, is_group },
+      where: { ref_id },
       order: [['id', 'DESC']],
       limit: 1
     })
@@ -100,7 +100,7 @@ class MessagesMD {
 
     MessagesDB.findAll({
       where: { type },
-      order: ['id', 'DESC'],
+      order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
     })
@@ -108,11 +108,11 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static async countByRefIdNotSeen(ref_id, is_group = false, user_id, callback) {
+  static async countByRefIdNotSeen(ref_id, user_id, callback) {
     return await MessagesDB.findAndCountAll({
       where: {
         [Op.and]: [
-          { is_group }, { ref_id }, {
+          { ref_id }, {
             seen: {
               [Op.notRegexp]: user_id
             }

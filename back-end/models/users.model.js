@@ -113,7 +113,7 @@ class UsersMD {
   }
 
   static async getUserCustomInfo(id, attributes = [], callback) {
-    if (attributes.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen'].includes(item)))
+    if (attributes?.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen']?.includes(item)))
       return callback?.(null, new Error("attributes is false"))
 
     return UsersDB.findOne({

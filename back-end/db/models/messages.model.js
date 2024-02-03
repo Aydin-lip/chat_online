@@ -9,16 +9,12 @@ const MessagesDB = sequelize.define('message', {
     autoIncrement: true
   },
   ref_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.VIRTUAL,
     allowNull: false,
   },
   user_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-  },
-  is_group: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
   },
   type: {
     type: DataTypes.ENUM,
@@ -30,7 +26,7 @@ const MessagesDB = sequelize.define('message', {
   },
   name: {
     type: DataTypes.STRING
-  },  
+  },
   description: {
     type: DataTypes.TEXT
   },

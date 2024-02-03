@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
+import { v4 as uuidV4 } from 'uuid'
 
-import { ChatsDB, UsersDB } from "../db/models/index.js";
+import { ChatsDB } from "../db/models/index.js";
 
 
 class ChatsMD {
@@ -10,7 +11,7 @@ class ChatsMD {
   }
 
   create(callback) {
-    ChatsDB.create(this)
+    ChatsDB.create({ id: uuidV4(), ...this })
       .then(res => callback(res))
       .catch(err => callback(null, err))
   }

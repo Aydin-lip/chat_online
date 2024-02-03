@@ -6,7 +6,7 @@ const GroupsDB = sequelize.define('group', {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true,
-    autoIncrement: true
+    // autoIncrement: true
   },
   owner: {
     type: DataTypes.INTEGER,

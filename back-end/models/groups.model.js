@@ -1,5 +1,6 @@
 import { Op } from 'sequelize'
 import { GroupsDB } from "../db/models/index.js"
+import { v4 as uuidV4 } from 'uuid'
 
 class GroupsMD {
   constructor({ owner, name, profile, description, members }) {
@@ -11,7 +12,7 @@ class GroupsMD {
   }
 
   create(callback) {
-    GroupsDB.create({ ...this, admins: [], members: [...this?.members, owner] })
+    GroupsDB.create({ id: uuidV4(), ...this, admins: [], members: [...this?.members, owner] })
       .then(res => callback(res))
       .catch(err => callback(null, err))
   }

@@ -3,7 +3,7 @@ import GroupsMD from "../models/groups.model.js"
 import MessagesMD from "../models/messages.model.js"
 import UsersMD from "../models/users.model.js"
 
-export const SendChats = socket => {
+export const SendPrivetChats = socket => {
   ChatsMD.get(socket.user?.id, async (res, err) => {
     if (!err) {
       if (res) {
@@ -15,7 +15,7 @@ export const SendChats = socket => {
         try {
           const resultUP = await Promise.all(chats.user_Ids.map(id => UsersMD.getUserProfileChat(id)))
           const resultLM = await Promise.all(chats.chat_Ids.map(id => MessagesMD.getByRefIdLast(id)))
-          const resultCN = await Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, false, socket.user?.id)))
+          const resultCN = await Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, socket.user?.id)))
 
           const allChats = resultUP.map((user, idx) => ({ ...user, notSeenMessages: resultCN?.[idx]?.count, lastMessage: resultLM?.[idx] }))
           socket.emit('Get_Chats', allChats)
@@ -40,8 +40,8 @@ export const SendGroups = socket => {
         const ids = res.map(r => r.id)
 
         try {
-          const resultLM = await Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id, true)))
-          const resultCN = await Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, true, socket.user?.id)))
+          const resultLM = await Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id)))
+          const resultCN = await Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, socket.user?.id)))
           const resultUC = await Promise.all(resultLM.map(({ user_id }) => UsersMD.getUserCustomInfo(user_id, ['firstname', 'lastname'])))
 
           const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resultCN?.[idx]?.count, lastMessage: { user: resultUC[idx], ...resultLM[idx] } }))
