@@ -87,13 +87,19 @@ class UsersMD {
       .catch(err => callback(null, err))
   }
 
-  static getUserProfileChat(id, callback) {
-    UsersDB.findOne({ 
+  static async getUserProfileChat(id, callback) {
+    return await UsersDB.findOne({
       where: { id },
       attributes: ['firstname', 'lastname', 'avatar']
-     })
-      .then(({ dataValues }) => callback(dataValues))
-      .catch(err => callback(null, err))
+    })
+      .then(({ dataValues }) => {
+        callback?.(dataValues)
+        return dataValues
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
 
 }

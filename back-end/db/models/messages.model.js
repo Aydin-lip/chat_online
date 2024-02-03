@@ -16,6 +16,10 @@ const MessagesDB = sequelize.define('message', {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+  is_group: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   type: {
     type: DataTypes.ENUM,
     values: ['text', 'file', 'voice'],
@@ -26,7 +30,7 @@ const MessagesDB = sequelize.define('message', {
   },
   name: {
     type: DataTypes.STRING
-  },
+  },  
   description: {
     type: DataTypes.TEXT
   },

@@ -7,8 +7,8 @@ import { MessagesDB, UsersDB } from "../db/models/index.js"
 // }
 
 class MessagesMD {
-  constructor({ ref_id, user_id, type, path, name, description, size, time, text }) {
-    const values = { ref_id, user_id, type, path, name, description, size, time, text }
+  constructor({ ref_id, user_id, is_group, type, path, name, description, size, time, text }) {
+    const values = { ref_id, user_id, is_group, type, path, name, description, size, time, text }
     Object.entries(values).forEach(([k, v]) => {
       if (v && (v || v.length >= 0))
         this[k] = v
@@ -66,11 +66,11 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static getByRefId(ref_id, option, callback) {
+  static getByRefId(ref_id, is_group, option, callback) {
     const { page = 1, pageSize = 20 } = option
 
     MessagesDB.findAll({
-      where: { ref_id },
+      where: { ref_id, is_group },
       order: ['id', 'DESC'],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
@@ -79,14 +79,20 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static getByRefIdLast(ref_id, callback) {
-    MessagesDB.findAll({
-      where: { ref_id },
-      order: ['id', 'DESC'],
+  static async getByRefIdLast(ref_id, is_group = false, callback) {
+    return await MessagesDB.findAll({
+      where: { ref_id, is_group },
+      order: [['id', 'DESC']],
       limit: 1
     })
-      .then(({ dataValues }) => callback(dataValues))
-      .catch(err => callback(null, err))
+      .then(res => {
+        callback?.(res?.map(r => r.dataValues))
+        return res
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
 
   static getByType(type, option, callback) {
@@ -102,11 +108,11 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static countByRefIdNotSeen(ref_id, user_id, callback) {
+  static countByRefIdNotSeen(ref_id, is_group, user_id, callback) {
     MessagesDB.findAndCountAll({
       where: {
         [Op.and]: [
-          { ref_id }, {
+          { is_group }, { ref_id }, {
             seen: {
               [Op.notRegexp]: user_id
             }

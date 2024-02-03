@@ -30,7 +30,7 @@ class ChatsMD {
         ]
       }
     })
-      .then(({ dataValues }) => callback(dataValues))
+      .then(res => callback(res?.map(r => r.dataValues)))
       .catch(err => callback(null, err))
   }
 
