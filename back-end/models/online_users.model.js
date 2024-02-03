@@ -1,4 +1,5 @@
 import { OnlineUsersDB } from "../db/models/index.js"
+import { Op } from 'sequelize'
 
 class OnlineUsersMD {
 
@@ -32,11 +33,38 @@ class OnlineUsersMD {
       })
   }
 
-  static getAll(callback) {
-    OnlineUsersDB.findAll()
-      .then(({ dataValues }) => callback(dataValues))
-      .catch(err => callback(null, err))
+  static async getAll(attributes = [], callback) {
+    return await OnlineUsersDB.findAll(attributes.length > 0 && { attributes })
+      .then(res => {
+        callback?.(res.map(r => r?.dataValues))
+        return res.map(r => r?.dataValues)
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
+
+  static async getAllByIds(ids, attributes = [], callback) {
+    const att = attributes.length > 0 && { attributes }
+    return await OnlineUsersDB.findAll({
+      where: {
+        user_id: {
+          [Op.regexp]: JSON.stringify(ids)
+        }
+      },
+      ...att
+    })
+      .then(res => {
+        callback?.(res.map(r => r?.dataValues))
+        return res.map(r => r?.dataValues)
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
+  }
+
 }
 
 export default OnlineUsersMD

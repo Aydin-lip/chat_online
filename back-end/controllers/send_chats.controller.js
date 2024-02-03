@@ -34,7 +34,7 @@ export const SendPrivetChats = socket => {
 }
 
 export const SendGroups = socket => {
-  GroupsMD.getGroupsById(socket.user?.id, async (res, err) => {
+  GroupsMD.getGroupsByUserId(socket.user?.id, async (res, err) => {
     if (!err) {
       if (res) {
         const ids = res.map(r => r.id)

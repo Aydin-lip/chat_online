@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
 import { GroupsDB } from "../db/models/index.js"
 import { v4 as uuidV4 } from 'uuid'
+import OnlineUsersMD from './online_users.model.js'
 
 class GroupsMD {
   constructor({ owner, name, profile, description, members }) {
@@ -44,7 +45,7 @@ class GroupsMD {
       .catch(err => callback(null, err))
   }
 
-  static getGroupsById(user_id, callback) {
+  static getGroupsByUserId(user_id, callback) {
     GroupsDB.findAll({
       where: {
         members: {
@@ -138,6 +139,42 @@ class GroupsMD {
       })
       .catch(err => callback(null, err))
   }
+
+  static getGroupCustomInfo(id, attributes = [], callback) {
+    let members = attributes.includes('members')
+    const onlineMembers = attributes.includes('online_members')
+    if (onlineMembers) attributes = attributes.filter(item => item !== 'online_members')
+
+    if (attributes?.find(item => !['owner', 'admins', 'name', 'profile', 'description', 'members', 'online_members']?.includes(item)))
+      return callback?.(null, new Error("attributes is false"))
+
+    if (onlineMembers && !members) {
+      attributes.push('members')
+      members = true
+    }
+
+    GroupsDB.findOne({
+      where: { id },
+      attributes: ['id', ...attributes]
+    })
+      .then(async ({ dataValues }) => {
+        if (members) dataValues.members = JSON.parse(dataValues.members)
+
+        if (!onlineMembers) return callback(dataValues)
+
+        try {
+          const result = await OnlineUsersMD.getAllByIds(dataValues.members, ['user_id'])
+          const allOnlineUsers = result.map(r => r?.user_id)
+          dataValues.online_members = allOnlineUsers
+          callback(dataValues)
+        } catch (error) {
+          callback(null, error)
+        }
+      })
+      .catch(err => callback(null, err))
+  }
+
+  static getGroupAllUsers
 
 }
 

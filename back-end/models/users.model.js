@@ -117,8 +117,8 @@ class UsersMD {
       return callback?.(null, new Error("attributes is false"))
 
     return UsersDB.findOne({
+      where: { id },
       attributes: ['id', ...attributes],
-      where: { id }
     })
       .then(({ dataValues }) => {
         callback?.(dataValues)
@@ -128,6 +128,26 @@ class UsersMD {
         callback?.(null, err)
         return err
       })
+  }
+
+  static getUsersCustomInfo(ids, attributes = [], option, callback) {
+    const { page = 1, pageSize = 20 } = option
+
+    if (attributes?.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen']?.includes(item)))
+      return callback?.(null, new Error("attributes is false"))
+
+    UsersDB.findAll({
+      where: {
+        id: {
+          [Op.regexp]: JSON.stringify(ids)
+        }
+      },
+      attributes: ['id', ...attributes],
+      limit: page * pageSize,
+      offset: (page - 1) * pageSize
+    })
+      .then(res => callback(res?.map(r => r?.dataValues)))
+      .catch(err => callback(null, err))
   }
 
 }
