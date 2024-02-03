@@ -86,8 +86,8 @@ class MessagesMD {
       limit: 1
     })
       .then(res => {
-        callback?.(res?.map(r => r.dataValues))
-        return res
+        callback?.(res?.map(r => r.dataValues)[0])
+        return res?.map(r => r.dataValues)?.[0]
       })
       .catch(err => {
         callback?.(null, err)

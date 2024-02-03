@@ -4,35 +4,26 @@ import MessagesMD from "../models/messages.model.js"
 import UsersMD from "../models/users.model.js"
 
 export const SendChats = socket => {
-  ChatsMD.get(socket.user?.id, (res, err) => {
+  ChatsMD.get(socket.user?.id, async (res, err) => {
     if (!err) {
       if (res) {
         const chats = {
           user_Ids: res.map(r => r.user_1 !== socket.user?.id ? r.user_1 : r.user_2),
           chat_Ids: res.map(r => r.id)
         }
-        Promise.all(chats.user_Ids.map(id => UsersMD.getUserProfileChat(id)))
-          .then(resPU => {
-            Promise.all(chats.chat_Ids.map(id => MessagesMD.getByRefIdLast(id)))
-              .then(resPC => {
-                Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, false, socket.user?.id)))
-                  .then(resCo => {
 
-                    const allChats = resPU.map((user, idx) => ({ ...user, notSeenMessages: resCo?.[idx]?.count, lastMessage: resPC?.[idx] }))
-                    socket.emit('Get_Chats', allChats)
+        try {
+          const resultUP = await Promise.all(chats.user_Ids.map(id => UsersMD.getUserProfileChat(id)))
+          const resultLM = await Promise.all(chats.chat_Ids.map(id => MessagesMD.getByRefIdLast(id)))
+          const resultCN = await Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, false, socket.user?.id)))
 
-                  })
-                  .catch(errCo => {
-                    socket.emit('error', { path: 'Get_Chats', message: 'In get Not seen messages have a problem! (Chats)', error: errCo })
-                  })
-              })
-              .catch(errPC => {
-                socket.emit('error', { path: 'Get_Chats', message: 'In get lastMessage have a problem! (Chats)', error: errPC })
-              })
-          })
-          .catch(errPU => {
-            socket.emit('error', { path: 'Get_Chats', message: 'In get users profile Chat have a problem!', error: errPU })
-          })
+          const allChats = resultUP.map((user, idx) => ({ ...user, notSeenMessages: resultCN?.[idx]?.count, lastMessage: resultLM?.[idx] }))
+          socket.emit('Get_Chats', allChats)
+        } catch (error) {
+          socket.emit('error', { path: 'Get_Chats', message: 'In get Users & LastMessage & Not seen messages  have a problem! (Chats)', error })
+
+        }
+
       } else {
         socket.emit('error', { path: 'Get_Chats', message: 'No have data in Chats', error: res })
       }
@@ -43,27 +34,22 @@ export const SendChats = socket => {
 }
 
 export const SendGroups = socket => {
-  GroupsMD.getGroupsById(socket.user?.id, (res, err) => {
+  GroupsMD.getGroupsById(socket.user?.id, async (res, err) => {
     if (!err) {
       if (res) {
         const ids = res.map(r => r.id)
 
-        Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id, true)))
-          .then(resPG => {
-            Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, true, socket.user?.id)))
-              .then(resCo => {
+        try {
+          const resultLM = await Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id, true)))
+          const resultCN = await Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, true, socket.user?.id)))
+          const resultUC = await Promise.all(resultLM.map(({ user_id }) => UsersMD.getUserCustomInfo(user_id, ['firstname', 'lastname'])))
 
-                const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resCo?.[idx]?.count, lastMessage: resPG[idx] }))
-                socket.emit('Get_Groups', allGroups)
-                
-              })
-              .catch(errCo => {
-                socket.emit('error', { path: 'Get_Groups', message: 'In get Not seen messages have a problem! (Groups)', error: errCo })
-              })
-          })
-          .catch(errPG => {
-            socket.emit('error', { path: 'Get_Groups', message: 'In get lastMessage have a problem! (Groups)', error: errPG })
-          })
+          const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resultCN?.[idx]?.count, lastMessage: { user: resultUC[idx], ...resultLM[idx] } }))
+          socket.emit('Get_Groups', allGroups)
+
+        } catch (error) {
+          socket.emit('error', { path: 'Get_Groups', message: 'In get Not seen messages or LastMessage have a problem! (Groups)', error })
+        }
 
       } else {
         socket.emit('error', { path: 'Get_Groups', message: 'No have data in Groups', error: res })

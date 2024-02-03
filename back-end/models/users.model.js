@@ -92,7 +92,7 @@ class UsersMD {
     return await Promise.all([
       UsersDB.findOne({
         where: { id },
-        attributes: ['firstname', 'lastname', 'avatar']
+        attributes: ['id', 'firstname', 'lastname', 'avatar']
       }),
       OnlineUsersMD.hasUser(id)
     ])
@@ -109,6 +109,24 @@ class UsersMD {
       .catch(err => {
         callback?.(null, err)
         return (err)
+      })
+  }
+
+  static async getUserCustomInfo(id, attributes = [], callback) {
+    if (attributes.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen'].includes(item)))
+      return callback?.(null, new Error("attributes is false"))
+
+    return UsersDB.findOne({
+      attributes: ['id', ...attributes],
+      where: { id }
+    })
+      .then(({ dataValues }) => {
+        callback?.(dataValues)
+        return dataValues
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
       })
   }
 

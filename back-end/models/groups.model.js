@@ -35,13 +35,22 @@ class GroupsMD {
       .catch(err => callback(null, err))
   }
 
+  static getGroupById(id, callback) {
+    GroupsDB.findOne({
+      where: { id }
+    })
+      .then(dataValues => callback?.(dataValues))
+      .catch(err => callback(null, err))
+  }
+
   static getGroupsById(user_id, callback) {
     GroupsDB.findAll({
       where: {
         members: {
           [Op.regexp]: user_id
         }
-      }
+      },
+      attributes: ['id', 'name', 'profile']
     })
       .then(res => callback(res?.map(r => r.dataValues)))
       .catch(err => callback(null, err))
