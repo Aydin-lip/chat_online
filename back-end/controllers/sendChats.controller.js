@@ -15,8 +15,16 @@ export const SendChats = socket => {
           .then(resPU => {
             Promise.all(chats.chat_Ids.map(id => MessagesMD.getByRefIdLast(id)))
               .then(resPC => {
-                const allChats = resPU.map((user, idx) => ({ ...user, lastMessage: resPC?.[idx] }))
-                socket.emit('Get_Chats', allChats)
+                Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, false, socket.user?.id)))
+                  .then(resCo => {
+
+                    const allChats = resPU.map((user, idx) => ({ ...user, notSeenMessages: resCo?.[idx]?.count, lastMessage: resPC?.[idx] }))
+                    socket.emit('Get_Chats', allChats)
+
+                  })
+                  .catch(errCo => {
+                    socket.emit('error', { path: 'Get_Chats', message: 'In get Not seen messages have a problem! (Chats)', error: errCo })
+                  })
               })
               .catch(errPC => {
                 socket.emit('error', { path: 'Get_Chats', message: 'In get lastMessage have a problem! (Chats)', error: errPC })
@@ -42,11 +50,19 @@ export const SendGroups = socket => {
 
         Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id, true)))
           .then(resPG => {
-            const allGroups = res.map((r, idx) => ({ ...r, lastMessage: resPG[idx] }))
-            socket.emit('Get_Groups', allGroups)
+            Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, true, socket.user?.id)))
+              .then(resCo => {
+
+                const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resCo?.[idx]?.count, lastMessage: resPG[idx] }))
+                socket.emit('Get_Groups', allGroups)
+                
+              })
+              .catch(errCo => {
+                socket.emit('error', { path: 'Get_Groups', message: 'In get Not seen messages have a problem! (Groups)', error: errCo })
+              })
           })
           .catch(errPG => {
-            socket.emit('error', { path: 'Get_Chats', message: 'In get lastMessage have a problem! (Groups)', error: errPG })
+            socket.emit('error', { path: 'Get_Groups', message: 'In get lastMessage have a problem! (Groups)', error: errPG })
           })
 
       } else {

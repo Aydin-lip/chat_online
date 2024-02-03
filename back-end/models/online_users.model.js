@@ -20,10 +20,16 @@ class OnlineUsersMD {
       .catch(err => callback(null, err))
   }
 
-  static hasUser(user_id, callback) {
-    OnlineUsersDB.findOne({ where: { user_id } })
-      .then(({ dataValues }) => callback(dataValues))
-      .catch(err => callback(null, err))
+  static async hasUser(user_id, callback) {
+    return await OnlineUsersDB.findOne({ where: { user_id } })
+      .then((res) => {
+        callback?.(res)
+        return res
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
 
   static getAll(callback) {

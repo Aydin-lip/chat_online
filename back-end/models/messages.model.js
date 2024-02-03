@@ -108,8 +108,8 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static countByRefIdNotSeen(ref_id, is_group, user_id, callback) {
-    MessagesDB.findAndCountAll({
+  static async countByRefIdNotSeen(ref_id, is_group = false, user_id, callback) {
+    return await MessagesDB.findAndCountAll({
       where: {
         [Op.and]: [
           { is_group }, { ref_id }, {
@@ -124,8 +124,14 @@ class MessagesMD {
         ]
       }
     })
-      .then(res => callback(res))
-      .catch(err => callback(null, err))
+      .then(res => {
+        callback?.(res)
+        return res
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
 
   static addSeen(id, user_id, callback) {

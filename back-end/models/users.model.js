@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { Op } from 'sequelize'
 
 import { UsersDB } from "../db/models/index.js"
+import OnlineUsersMD from "./online_users.model.js"
 
 dotenv.config()
 
@@ -88,17 +89,26 @@ class UsersMD {
   }
 
   static async getUserProfileChat(id, callback) {
-    return await UsersDB.findOne({
-      where: { id },
-      attributes: ['firstname', 'lastname', 'avatar']
-    })
-      .then(({ dataValues }) => {
-        callback?.(dataValues)
-        return dataValues
+    return await Promise.all([
+      UsersDB.findOne({
+        where: { id },
+        attributes: ['firstname', 'lastname', 'avatar']
+      }),
+      OnlineUsersMD.hasUser(id)
+    ])
+      .then(res => {
+        const [{ dataValues: user }, online] = res
+        if (online) {
+          user.online = true
+        } else {
+          user.online = false
+        }
+        callback?.(user)
+        return user
       })
       .catch(err => {
         callback?.(null, err)
-        return err
+        return (err)
       })
   }
 
