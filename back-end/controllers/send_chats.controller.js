@@ -42,9 +42,9 @@ export const SendGroups = socket => {
         try {
           const resultLM = await Promise.all(ids.map(id => MessagesMD.getByRefIdLast(id)))
           const resultCN = await Promise.all(ids.map(id => MessagesMD.countByRefIdNotSeen(id, socket.user?.id)))
-          const resultUC = await Promise.all(resultLM.map(({ user_id }) => UsersMD.getUserCustomInfo(user_id, ['firstname', 'lastname'])))
+          const resultUC = await Promise.all(resultLM.filter(item => item).map(({ user_id }) => UsersMD.getUserCustomInfo(user_id, ['firstname', 'lastname'])))
 
-          const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resultCN?.[idx]?.count, lastMessage: { user: resultUC[idx], ...resultLM[idx] } }))
+          const allGroups = res.map((r, idx) => ({ ...r, notSeenMessages: resultCN?.[idx]?.count, lastMessage: { user: resultUC?.[idx], ...resultLM?.[idx] } }))
           socket.emit('Get_Groups', allGroups)
 
         } catch (error) {

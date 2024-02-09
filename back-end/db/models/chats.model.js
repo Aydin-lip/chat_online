@@ -3,7 +3,7 @@ import sequelize from "../mysql.js";
 
 const ChatsDB = sequelize.define('chat', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
     // autoIncrement: true

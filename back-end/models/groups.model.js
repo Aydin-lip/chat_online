@@ -174,8 +174,6 @@ class GroupsMD {
       .catch(err => callback(null, err))
   }
 
-  static getGroupAllUsers
-
 }
 
 export default GroupsMD

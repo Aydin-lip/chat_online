@@ -3,7 +3,7 @@ import sequelize from "../mysql.js";
 
 const GroupsDB = sequelize.define('group', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
     // autoIncrement: true

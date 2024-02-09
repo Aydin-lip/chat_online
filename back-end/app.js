@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import { configDotenv } from 'dotenv'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 import { createServer } from 'http'
@@ -12,14 +12,15 @@ import ChatRouter from './routes/chat.route.js'
 import sequelize from './db/mysql.js'
 import { ChatsDB, MessagesDB, GroupsDB, UsersDB, OnlineUsersDB } from './db/models/index.js'
 import Authorization from './middleware/authorization.js'
-import { Connect, Disconnect, SelectChat, SendPrivetChats, SendGroups, SignIn, SignUp, GetUserCustomInfo, GetGroupCustomInfo, GetUsersCustomInfo, SeenMessages } from './controllers/index.js'
+import { Connect, Disconnect, SelectChat, SendPrivetChats, SendGroups, SignIn, SignUp, GetUserCustomInfo, GetGroupCustomInfo, GetUsersCustomInfo, SeenMessages, SendMessage } from './controllers/index.js'
 import bodyParser from 'body-parser'
 import OnlineUsersMD from './models/online_users.model.js'
 import UsersMD from './models/users.model.js'
 import ChatsMD from './models/chats.model.js'
 import MessagesMD from './models/messages.model.js'
 
-dotenv.config()
+configDotenv()
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express()
 const server = createServer(app)
@@ -107,6 +108,9 @@ io.use(Authorization).on('connection', socket => {
   socket.on('Get_Group_Custom_Info', (...arg) => GetGroupCustomInfo(socket, ...arg))
 
   socket.on('Seen_Messages', (...arg) => SeenMessages(socket, ...arg))
+
+  app.use('/send_message', ChatRouter)
+  socket.on('Send_Message', (...arg) => SendMessage(socket, ...arg))
 
 
 
@@ -239,8 +243,6 @@ io.use(Authorization).on('connection', socket => {
 
     getUsersHandler()
   }
-
-  app.use('/chat/send_message', ChatRouter)
 
   socket.on('send_message', async data => {
     let findToken = tokens?.find(tok => {

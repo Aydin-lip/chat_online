@@ -9,7 +9,7 @@ const MessagesDB = sequelize.define('message', {
     autoIncrement: true
   },
   ref_id: {
-    type: DataTypes.VIRTUAL,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   user_id: {
@@ -31,6 +31,9 @@ const MessagesDB = sequelize.define('message', {
     type: DataTypes.TEXT
   },
   size: {
+    type: DataTypes.INTEGER
+  },
+  time: {
     type: DataTypes.INTEGER
   },
   text: {
