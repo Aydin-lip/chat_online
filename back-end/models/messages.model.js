@@ -134,19 +134,45 @@ class MessagesMD {
       })
   }
 
-  static addSeen(id, user_id, callback) {
-    MessagesDB.findOne({ where: { id } })
-      .then(({ dataValues }) => {
-        const allSeen = dataValues.seen
-        if (allSeen.includes(user_id))
-          return callback(new Error('This user id already visited message!'))
-
-        allSeen.push(user_id)
-        MessagesDB.update({ seen: allSeen }, { where: { id } })
-          .then(res => callback(res))
-          .catch(err => callback(null, err))
+  static addSeen(ids, user_id, callback) {
+    MessagesDB.findAll({
+      where: {
+        [Op.and]: [
+          {
+            id: {
+              [Op.regexp]: ids.join('|')
+            }
+          }, {
+            seen: {
+              [Op.notRegexp]: user_id
+            }
+          }
+        ]
+      }
+    })
+      .then(res => {
+        const messages = res?.map(r => r?.dataValues)
+        Promise.all(messages.map(message =>
+          MessagesDB.update({ seen: [...JSON.parse(message.seen), user_id] }, { where: { id: message.id } })
+        ))
+          .then(resP => callback(resP))
+          .catch(errP => callback(null, errP))
       })
       .catch(err => callback(null, err))
+
+
+    // MessagesDB.findOne({ where: { id } })
+    //   .then(({ dataValues }) => {
+    //     const allSeen = dataValues.seen
+    //     if (allSeen.includes(user_id))
+    //       return callback(new Error('This user id already visited message!'))
+
+    //     allSeen.push(user_id)
+    //     MessagesDB.update({ seen: allSeen }, { where: { id } })
+    //       .then(res => callback(res))
+    //       .catch(err => callback(null, err))
+    //   })
+    //   .catch(err => callback(null, err))
   }
 
   static addAction(id, user_id, action, callback) {

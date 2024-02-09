@@ -12,7 +12,7 @@ import ChatRouter from './routes/chat.route.js'
 import sequelize from './db/mysql.js'
 import { ChatsDB, MessagesDB, GroupsDB, UsersDB, OnlineUsersDB } from './db/models/index.js'
 import Authorization from './middleware/authorization.js'
-import { Connect, Disconnect, SelectChat, SendPrivetChats, SendGroups, SignIn, SignUp, GetUserCustomInfo, GetGroupCustomInfo, GetUsersCustomInfo } from './controllers/index.js'
+import { Connect, Disconnect, SelectChat, SendPrivetChats, SendGroups, SignIn, SignUp, GetUserCustomInfo, GetGroupCustomInfo, GetUsersCustomInfo, SeenMessages } from './controllers/index.js'
 import bodyParser from 'body-parser'
 import OnlineUsersMD from './models/online_users.model.js'
 import UsersMD from './models/users.model.js'
@@ -105,6 +105,10 @@ io.use(Authorization).on('connection', socket => {
   socket.on('Get_User_Custom_Info', (...arg) => GetUserCustomInfo(socket, ...arg))
   socket.on('Get_Users_Custom_Info', (...arg) => GetUsersCustomInfo(socket, ...arg))
   socket.on('Get_Group_Custom_Info', (...arg) => GetGroupCustomInfo(socket, ...arg))
+
+  socket.on('Seen_Messages', (...arg) => SeenMessages(socket, ...arg))
+
+
 
 
   let userName
