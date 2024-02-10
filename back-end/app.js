@@ -110,7 +110,7 @@ io.use(Authorization).on('connection', socket => {
   socket.on('Seen_Messages', (...arg) => SeenMessages(socket, ...arg))
 
   app.use('/send_message', ChatRouter)
-  socket.on('Send_Message', (...arg) => SendMessage(socket, ...arg))
+  socket.on('Send_Message', (...arg) => SendMessage(io, socket, ...arg))
 
 
 

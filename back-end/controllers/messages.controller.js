@@ -1,5 +1,5 @@
+import GroupsMD from "../models/groups.model.js"
 import MessagesMD from "../models/messages.model.js"
-import OnlineUsersMD from "../models/online_users.model.js"
 import { AddNewMessageValidation } from "../validations/messages.validation.js"
 
 export const SeenMessages = (socket, ids) => {
@@ -12,19 +12,25 @@ export const SeenMessages = (socket, ids) => {
   })
 }
 
-export const SendMessage = (socket, data) => {
+export const SendMessage = (io, socket, data) => {
   AddNewMessageValidation.validate(data, { abortEarly: false })
     .then(resV => {
       const message = new MessagesMD({ ...data, user_id: socket.user?.id })
       message.add((res, err) => {
         if (!err) {
-          OnlineUsersMD.getAllByChatId(data.ref_id, [], (resO, errO) => {
-            if (!errO) {
-              resO.map(user => {
-                socket.to(user?.id).emit('New_Message', { message: res })
-              })
+          const { firstname, lastname, avatar } = socket.user
+          GroupsMD.getGroupCustomInfo(data.ref_id, ['online_members'], (resOU, errOU) => {
+            if (!errOU) {
+              if (resOU)
+                resOU.online_members_socket.map(id => {
+                  io.to(id).emit('New_Message', {
+                    message: { user: { firstname, lastname, avatar }, ...res }
+                  })
+                })
+              else
+                socket.emit('error', { path: 'Send_Message', message: 'dont have data in resOU!', error: errOU })
             } else {
-              socket.emit('error', { path: 'Send_Message', message: 'Error for send message get online users!', error: errO })
+              socket.emit('error', { path: 'Send_Message', message: 'Error for send message get online users!', error: errOU })
             }
           })
         } else {

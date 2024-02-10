@@ -157,9 +157,11 @@ class GroupsMD {
         if (!onlineMembers) return callback(dataValues)
 
         try {
-          const result = await OnlineUsersMD.getAllByUsersId(dataValues.members, ['user_id'])
-          const allOnlineUsers = result.map(r => r?.user_id)
-          dataValues.online_members = allOnlineUsers
+          const result = await OnlineUsersMD.getAllByUsersId(dataValues.members, ['id', 'user_id'])
+          const allOnlineUsersSocket_Id = result.map(r => r?.id)
+          const allOnlineUsersUser_Id = result.map(r => r?.user_id)
+          dataValues.online_members = allOnlineUsersUser_Id
+          dataValues.online_members_socket = allOnlineUsersSocket_Id
           callback(dataValues)
         } catch (error) {
           callback(null, error)
