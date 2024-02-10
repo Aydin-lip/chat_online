@@ -10,7 +10,7 @@ const Authorization = (socket, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, encoded) => {
     if (err) {
-      next(new Error('Authentication error'))
+      next(new Error('Authentication error!'))
     } else {
       UsersMD.getUserInfo(encoded.user_id, (res, err) => {
         if (!err) {
@@ -18,7 +18,7 @@ const Authorization = (socket, next) => {
           next()
         } else {
           console.log('user not found! : ', err)
-          next(new Error('Database error'))
+          next(new Error('Database error!'))
         }
       })
     }

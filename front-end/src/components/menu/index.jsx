@@ -4,16 +4,16 @@ import socket from '../../socket'
 import Style from './style.module.scss'
 
 const Menu = () => {
-  const [username, setUsername] = useState('')
+  const [info, setInfo] = useState({})
   const [users, setUsers] = useState([])
   const [selectUser, setSelectUser] = useState('')
 
   useEffect(() => {
-    socket.on('nick_name', value => setUsername(value))
+    socket.on('Get_Info', data => setInfo(data))
     socket.on('users', users => {
       setUsers(users)
     })
-  }, [username, users])
+  }, [info, users])
 
   const selectUserHandle = user => {
     setSelectUser(user.id)
@@ -26,7 +26,7 @@ const Menu = () => {
         <div className={Style.profile}>
           <img src="/images/avatar.png" alt="default avatar" />
           <div className={Style.information}>
-            <span>{username}</span>
+            <span>{info.firstname} {info.lastname}</span>
             <span>Front end Developer</span>
           </div>
           <div className={Style.icon}>
@@ -48,7 +48,6 @@ const Menu = () => {
         <h5 className={Style.subtitle}>Users</h5>
         <div className={Style.usersBox}>
           {users?.map(user =>
-            user.username !== username &&
             <div
               key={user.id}
               className={selectUser === user.id ? Style.active : ''}
@@ -65,9 +64,9 @@ const Menu = () => {
               </div>
               <div className={Style.detail}>
                 <span className={Style.date}>{user.last_message?.time}</span>
-                {user.last_message?.from === username &&
+                {/* {user.last_message?.from === username &&
                   <span className={Style.status}>✔{!user.last_message?.unVisit && '✔'}</span>
-                }
+                } */}
                 {user.unVisit_count > 0 &&
                   <span className={Style.unSeen}>{user.unVisit_count}</span>
                 }

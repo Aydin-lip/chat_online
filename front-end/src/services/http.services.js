@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
+import Routes from '../routes/routes';
 
 const httpService = axios.create({
   baseURL: "http://localhost:8080",
@@ -21,22 +23,22 @@ const httpService = axios.create({
 //   };
 // });
 
-// httpService.interceptors.response.use(
-//   response => response,
-//   error => {
-//     const status = error?.response?.status
-//     const statusCode = error?.statusCode
+httpService.interceptors.response.use(
+  response => response,
+  error => {
+    const status = error?.response?.status
+    const statusCode = error?.statusCode
 
-//     if (status === 401) {
-//       localStorage.removeItem('token')
-//       localStorage.removeItem('access-token')
-//       location.pathname = '/'
-//     }
-//     if (statusCode === 500)
-//       toast.error('مشکلی پیش آمده لطفا بعدا دوباره امتحان نمایید!')
+    if (status === 401) {
+      localStorage.clear()
+      toast.warning('You do not have the required access!')
+      Routes.navigate('/sign-in')
+    }
+    if (statusCode === 500)
+      toast.error('We have a problem pls try later!')
 
-//     return Promise.reject(error);
-//   });
+    return Promise.reject(error);
+  });
 
 
 export default httpService
