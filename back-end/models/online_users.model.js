@@ -1,10 +1,10 @@
 import { OnlineUsersDB } from "../db/models/index.js"
-import { Op } from 'sequelize'
+import { Op, literal } from 'sequelize'
 
 class OnlineUsersMD {
 
-  static async add(user_id, callback) {
-    OnlineUsersDB.create({ user_id })
+  static async add(id, user_id, callback) {
+    OnlineUsersDB.create({ id, user_id })
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }
@@ -45,13 +45,51 @@ class OnlineUsersMD {
       })
   }
 
-  static async getAllByIds(ids, attributes = [], callback) {
+  static async getAllByUsersId(users_id, attributes = [], callback) {
     const att = attributes.length > 0 && { attributes }
     return await OnlineUsersDB.findAll({
       where: {
         user_id: {
-          [Op.regexp]: JSON.stringify(ids)
+          [Op.or]: users_id.map(id => literal(`JSON_CONTAINS(user_id, ${id})`))
         }
+      },
+      ...att
+    })
+      .then(res => {
+        callback?.(res.map(r => r?.dataValues))
+        return res.map(r => r?.dataValues)
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
+  }
+
+  static async getAllByIds(ids, attributes = [], callback) {
+    const att = attributes.length > 0 && { attributes }
+    return await OnlineUsersDB.findAll({
+      where: {
+        id: {
+          [Op.or]: ids.map(id => literal(`JSON_CONTAINS(id, ${id})`))
+        }
+      },
+      ...att
+    })
+      .then(res => {
+        callback?.(res.map(r => r?.dataValues))
+        return res.map(r => r?.dataValues)
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
+  }
+
+  static async getAllByChatId(chat_id, attributes = [], callback) {
+    const att = attributes.length > 0 && { attributes }
+    return await OnlineUsersDB.findAll({
+      where: {
+        chat_id
       },
       ...att
     })

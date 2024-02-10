@@ -3,10 +3,9 @@ import sequelize from "../mysql.js";
 
 const OnlineUsersDB = sequelize.define('online_user', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
     primaryKey: true,
-    autoIncrement: true
   },
   user_id: {
     type: DataTypes.INTEGER,

@@ -1,4 +1,4 @@
-import { Op } from 'sequelize'
+import { Op, literal } from 'sequelize'
 import { GroupsDB } from "../db/models/index.js"
 import { v4 as uuidV4 } from 'uuid'
 import OnlineUsersMD from './online_users.model.js'
@@ -48,9 +48,7 @@ class GroupsMD {
   static getGroupsByUserId(user_id, callback) {
     GroupsDB.findAll({
       where: {
-        members: {
-          [Op.regexp]: user_id
-        }
+        members: literal(`JSON_CONTAINS(members, ${user_id})`)
       },
       attributes: ['id', 'name', 'profile']
     })
@@ -97,9 +95,7 @@ class GroupsMD {
       where: {
         [Op.and]: [
           { id }, {
-            members: {
-              [Op.regexp]: user_id
-            }
+            members: literal(`JSON_CONTAINS(members, ${user_id})`)
           }
         ]
       },
@@ -121,9 +117,7 @@ class GroupsMD {
       where: {
         [Op.and]: [
           { id }, {
-            members: {
-              [Op.regexp]: user_id
-            }
+            members: literal(`JSON_CONTAINS(members, ${user_id})`)
           }
         ]
       },
@@ -163,7 +157,7 @@ class GroupsMD {
         if (!onlineMembers) return callback(dataValues)
 
         try {
-          const result = await OnlineUsersMD.getAllByIds(dataValues.members, ['user_id'])
+          const result = await OnlineUsersMD.getAllByUsersId(dataValues.members, ['user_id'])
           const allOnlineUsers = result.map(r => r?.user_id)
           dataValues.online_members = allOnlineUsers
           callback(dataValues)

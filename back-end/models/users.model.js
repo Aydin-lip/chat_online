@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
 import bcrypt from 'bcryptjs'
-import { Op } from 'sequelize'
+import { Op, literal } from 'sequelize'
 
 import { UsersDB } from "../db/models/index.js"
 import OnlineUsersMD from "./online_users.model.js"
@@ -139,7 +139,7 @@ class UsersMD {
     UsersDB.findAll({
       where: {
         id: {
-          [Op.regexp]: JSON.stringify(ids)
+          [Op.or]: ids.map(id => literal(`JSON_CONTAINS(id, ${id})`))
         }
       },
       attributes: ['id', ...attributes],

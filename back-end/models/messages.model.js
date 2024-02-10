@@ -1,4 +1,4 @@
-import { Op } from 'sequelize'
+import { Op, literal } from 'sequelize'
 import { MessagesDB, UsersDB } from "../db/models/index.js"
 
 // option: {
@@ -140,7 +140,7 @@ class MessagesMD {
         [Op.and]: [
           {
             id: {
-              [Op.regexp]: ids.join('|')
+              [Op.or]: ids.map(id => literal(`JSON_CONTAINS(id, ${id})`))
             }
           }, {
             seen: {
