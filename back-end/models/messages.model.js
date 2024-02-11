@@ -1,5 +1,6 @@
 import { Op, literal } from 'sequelize'
 import { MessagesDB, UsersDB } from "../db/models/index.js"
+import UsersMD from './users.model.js'
 
 // option: {
 //   page,
@@ -53,29 +54,42 @@ class MessagesMD {
       .catch(err => callback(null, err))
   }
 
-  static getByUserUserId(user_id, option, callback) {
+  static getByUserId(user_id, option, callback) {
     const { page = 1, pageSize = 20 } = option
 
     MessagesDB.findAll({
       where: { user_id },
-      order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
     })
-      .then(({ dataValues }) => callback(dataValues))
+      .then((res) => callback(res?.map(r => r?.dataValues)))
       .catch(err => callback(null, err))
   }
 
   static getByRefId(ref_id, option, callback) {
-    const { page = 1, pageSize = 20 } = option
+    const pageLimited = option ? {
+      limit: page * pageSize,
+      offset: (page - 1) * pageSize
+    } : {}
+
+    console.log(pageLimited, option)
 
     MessagesDB.findAll({
       where: { ref_id },
-      order: [['id', 'DESC']],
-      limit: page * pageSize,
-      offset: (page - 1) * pageSize
+      // order: [['id', 'DESC']],
+      ...pageLimited
     })
-      .then(res => callback(res.map(r => r?.dataValues)))
+      .then(async res => {
+        const data = res.map(r => r?.dataValues)
+        const ids = data.map(r => r.user_id)
+        try {
+          const resultUP = await UsersMD.getUsersCustomInfo(ids, ['firstname', 'lastname', 'username', 'avatar'], option)
+          const newData = data.map((r, idx) => ({ ...r, user: resultUP[idx] }))
+          callback(newData)
+        } catch (error) {
+          callback(null, error)
+        }
+      })
       .catch(err => callback(null, err))
   }
 
@@ -100,7 +114,7 @@ class MessagesMD {
 
     MessagesDB.findAll({
       where: { type },
-      order: [['id', 'DESC']],
+      // order: [['id', 'DESC']],
       limit: page * pageSize,
       offset: (page - 1) * pageSize
     })

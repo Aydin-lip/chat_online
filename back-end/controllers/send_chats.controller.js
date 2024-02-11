@@ -17,7 +17,7 @@ export const SendPrivetChats = socket => {
           const resultLM = await Promise.all(chats.chat_Ids.map(id => MessagesMD.getByRefIdLast(id)))
           const resultCN = await Promise.all(chats.chat_Ids.map(id => MessagesMD.countByRefIdNotSeen(id, socket.user?.id)))
 
-          const allChats = resultUP.map((user, idx) => ({ ...user, notSeenMessages: resultCN?.[idx]?.count, lastMessage: resultLM?.[idx] }))
+          const allChats = resultUP.map((user, idx) => ({ ...user, user_id: user.id, id: chats.chat_Ids[idx], notSeenMessages: resultCN?.[idx]?.count, lastMessage: resultLM?.[idx] }))
           socket.emit('Get_Chats', allChats)
         } catch (error) {
           socket.emit('error', { path: 'Get_Chats', message: 'In get Users & LastMessage & Not seen messages  have a problem! (Chats)', error })

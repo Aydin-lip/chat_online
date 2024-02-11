@@ -18,7 +18,7 @@ class UsersMD {
 
   async register(callback) {
     const passHash = await bcrypt.hash(this.password, +process.env.SALT_BCRYPT)
-    UsersDB.create({ ...this, password: passHash })
+    UsersDB.create({ ...this, avatar: [], password: passHash })
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }
@@ -92,7 +92,7 @@ class UsersMD {
     return await Promise.all([
       UsersDB.findOne({
         where: { id },
-        attributes: ['id', 'firstname', 'lastname', 'avatar']
+        attributes: ['id', 'firstname', 'lastname', 'avatar', 'username']
       }),
       OnlineUsersMD.hasUser(id)
     ])
@@ -113,16 +113,31 @@ class UsersMD {
   }
 
   static async getUserCustomInfo(id, attributes = [], callback) {
-    if (attributes?.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen']?.includes(item)))
+    if (attributes?.find(item => !['firstname', 'lastname', 'phone', 'online', 'username', 'bio', 'avatar', 'last_seen']?.includes(item)))
       return callback?.(null, new Error("attributes is false"))
 
     return UsersDB.findOne({
       where: { id },
-      attributes: ['id', ...attributes],
+      attributes: ['id', ...attributes.filter(att => att !== 'online')],
     })
-      .then(({ dataValues }) => {
-        callback?.(dataValues)
-        return dataValues
+      .then(async ({ dataValues }) => {
+        if (!attributes.includes('online')) {
+          callback?.(dataValues)
+          return dataValues
+        }
+
+        try {
+          const hasUser = await OnlineUsersMD.hasUser(id)
+          if (hasUser)
+            dataValues.online = true
+          else
+            dataValues.online = false
+          callback?.(dataValues)
+          return dataValues
+        } catch (error) {
+          callback?.(null, error)
+          return error
+        }
       })
       .catch(err => {
         callback?.(null, err)
@@ -130,24 +145,32 @@ class UsersMD {
       })
   }
 
-  static getUsersCustomInfo(ids, attributes = [], option, callback) {
-    const { page = 1, pageSize = 20 } = option
+  static async getUsersCustomInfo(ids, attributes = [], option, callback) {
+    const pageLimited = option ? {
+      limit: page * pageSize,
+      offset: (page - 1) * pageSize
+    } : {}
 
     if (attributes?.find(item => !['firstname', 'lastname', 'phone', 'username', 'bio', 'avatar', 'last_seen']?.includes(item)))
       return callback?.(null, new Error("attributes is false"))
 
-    UsersDB.findAll({
+    return UsersDB.findAll({
       where: {
         id: {
           [Op.or]: ids.map(id => literal(`JSON_CONTAINS(id, ${id})`))
         }
       },
       attributes: ['id', ...attributes],
-      limit: page * pageSize,
-      offset: (page - 1) * pageSize
+      ...pageLimited
     })
-      .then(res => callback(res?.map(r => r?.dataValues)))
-      .catch(err => callback(null, err))
+      .then(res => {
+        callback?.(res?.map(r => r?.dataValues))
+        return res?.map(r => r?.dataValues)
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
   }
 
 }

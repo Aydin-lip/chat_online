@@ -16,7 +16,7 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: start;
   padding: 1rem;
   // margin-top: 0.5rem;
   // border-bottom: 1px solid $text-primary;
@@ -38,11 +38,13 @@
     .typing {
       margin: 0;
       position: absolute;
-      bottom: -0.9rem;
-      left: 0.5rem;
+      bottom: -1.3rem;
+      left: 0;
       font-size: 0.8rem;
       color: #a5a5a5;
       display: flex;
+      gap: .5rem;
+      text-wrap: nowrap;
     }
     .status {
       display: block;

@@ -3,7 +3,7 @@ import { PulseLoader } from "react-spinners"
 import socket from "../../socket"
 import Style from './style.module.scss'
 
-const ChatHeader = ({ data }) => {
+const ChatHeader = ({ group, data }) => {
   const [status, setStatus] = useState(false)
   const [typing, setTyping] = useState(false)
 
@@ -24,13 +24,25 @@ const ChatHeader = ({ data }) => {
     }
   }, [])
 
+  const getDate = (date) => {
+    if (!date) return
+
+    let stringDate = new Date(date).toString()
+    let splitDate = stringDate.split(' ')
+    let month = `${splitDate[1]} ${splitDate[2]} `
+    let splitClock = date.split('T')[1].split(':')
+    let clock = `${splitClock[0]}:${splitClock[1]}`
+
+    return month + clock
+  }
+
   return (
     <>
       <div className={Style.header}>
         <img src="/images/avatar.png" alt="default avatar" />
         <div className={Style.information}>
-          <h6>{data.username}</h6>
-          {typing &&
+          <h6>{group ? data.name : data.username}</h6>
+          {/* {!typing &&
             <p className={Style.typing}>
               Typing
               <PulseLoader
@@ -39,8 +51,18 @@ const ChatHeader = ({ data }) => {
                 margin={1}
               />
             </p>
-          }
-          {status &&
+          } */}
+          <p className={Style.typing}>
+            {group ?
+              <>
+                <span>{data.members?.length}</span>
+                members
+              </>
+              :
+              !data.online ? getDate(data.last_seen) : 'online'
+            }
+          </p>
+          {data?.online &&
             <span className={Style.status}></span>
           }
         </div>

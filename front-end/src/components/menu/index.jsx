@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate, useNavigation } from 'react-router-dom'
 
 import socket from '../../socket'
 import Style from './style.module.scss'
@@ -6,28 +7,45 @@ import Style from './style.module.scss'
 const Menu = () => {
   const [info, setInfo] = useState({})
   const [users, setUsers] = useState([])
+  const [groups, setGroups] = useState([])
   const [selectUser, setSelectUser] = useState('')
+
+  const navigation = useNavigation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     socket.on('Get_Info', data => setInfo(data))
-    socket.on('users', users => {
-      setUsers(users)
-    })
+    socket.on('Get_Chats', data => setUsers(data))
+    socket.on('Get_Groups', data => setGroups(data))
   }, [info, users])
 
-  const selectUserHandle = user => {
-    setSelectUser(user.id)
-    socket.emit('select_chat', user)
+  const selectChatHandler = (chat, group) => {
+    navigation.text = chat?.user_id
+    navigate(`/${group ? 'group' : 'user'}/${chat.id}`)
+    setSelectUser(chat.id)
+  }
+
+  const getDate = (date) => {
+    if (!date) return
+
+    let stringDate = new Date(date).toString()
+    let splitDate = stringDate.split(' ')
+    let month = `${splitDate[1]} ${splitDate[2]} `
+    let splitClock = date.split('T')[1].split(':')
+    let clock = `${splitClock[0]}:${splitClock[1]}`
+
+    return month + clock
   }
 
   return (
     <>
       <div className={Style.menu}>
         <div className={Style.profile}>
-          <img src="/images/avatar.png" alt="default avatar" />
+          <img src={info.avatar?.length > 0 ? info?.avatar?.[0] : "/images/avatar.png"} alt="default avatar" />
           <div className={Style.information}>
+            <span>{info.username}</span>
             <span>{info.firstname} {info.lastname}</span>
-            <span>Front end Developer</span>
+            {/* <span>{info.bio}</span> */}
           </div>
           <div className={Style.icon}>
             <span>
@@ -51,30 +69,58 @@ const Menu = () => {
             <div
               key={user.id}
               className={selectUser === user.id ? Style.active : ''}
-              onClick={e => selectUserHandle(user)}>
+              onClick={e => selectChatHandler(user)}>
               <div className={Style.avatar}>
-                <img src="/images/avatar.png" alt="default avatar" />
+                <img src={user.avatar?.length > 0 ? user?.avatar?.[0] : "/images/avatar.png"} alt="default avatar" />
                 {user.online &&
                   <div></div>
                 }
               </div>
               <div className={Style.specification}>
-                <span>{user.username}</span>
-                <span>{user.last_message?.text ?? user.last_message?.name}</span>
+                <span>{user.firstname ?? user.username} {user.lastname}</span>
+                <span>{user.lastMessage?.text}</span>
               </div>
               <div className={Style.detail}>
-                <span className={Style.date}>{user.last_message?.time}</span>
-                {/* {user.last_message?.from === username &&
-                  <span className={Style.status}>✔{!user.last_message?.unVisit && '✔'}</span>
-                } */}
-                {user.unVisit_count > 0 &&
-                  <span className={Style.unSeen}>{user.unVisit_count}</span>
+                <span className={Style.date}>{getDate(user.lastMessage?.createdAt)}</span>
+                {user.lastMessage?.user_id === info.id &&
+                  <span className={Style.status}>✔{JSON.parse(user.lastMessage?.seen ?? "[]").length > 0 && '✔'}</span>
+                }
+                {user.notSeenMessages > 0 &&
+                  <span className={Style.unSeen}>{user.notSeenMessages}</span>
                 }
               </div>
             </div>
           )}
         </div>
         <h5 className={Style.subtitle}>Groups</h5>
+        <div className={Style.usersBox}>
+          {groups?.map(group =>
+            <div
+              key={group.id}
+              className={selectUser === group.id ? Style.active : ''}
+              onClick={e => selectChatHandler(group, true)}>
+              <div className={Style.avatar}>
+                <img src={group.avatar?.length > 0 ? group?.avatar?.[0] : "/images/group_prof.jpg"} alt="default avatar" />
+                {/* {group.online &&
+                  <div></div>
+                } */}
+              </div>
+              <div className={Style.specification}>
+                <span>{group.name}</span>
+                <span>{group.lastMessage?.user?.firstname}: {group.lastMessage?.text}</span>
+              </div>
+              <div className={Style.detail}>
+                <span className={Style.date}>{getDate(group.lastMessage?.createdAt)}</span>
+                {group.lastMessage?.user_id === info.id &&
+                  <span className={Style.status}>✔{JSON.parse(group.lastMessage?.seen ?? "[]").length > 0 && '✔'}</span>
+                }
+                {group.notSeenMessages > 0 &&
+                  <span className={Style.unSeen}>{group.notSeenMessages}</span>
+                }
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   )

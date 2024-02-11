@@ -23,9 +23,9 @@ class OnlineUsersMD {
 
   static async hasUser(user_id, callback) {
     return await OnlineUsersDB.findOne({ where: { user_id } })
-      .then((res) => {
-        callback?.(res)
-        return res
+    .then((res) => {
+        callback?.(res?.dataValues ?? false)
+        return res?.dataValues ?? false
       })
       .catch(err => {
         callback?.(null, err)

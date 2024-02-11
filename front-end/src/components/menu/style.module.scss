@@ -24,6 +24,7 @@
   height: 100%;
   background-color: $primary;
   border-right: 1px solid $secondary;
+  max-width: 20rem;
   .profile {
     display: flex;
     align-items: center;
@@ -35,8 +36,14 @@
     }
     .information {
       @include specification;
-      span:first-child {
+      :first-child {
         font-size: 1.25rem;
+      }
+      :last-child {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
       }
     }
     .icon {
@@ -90,6 +97,7 @@
       img {
         width: 3rem;
         height: 3rem;
+        border-radius: 50%;
       }
       &:hover {
         background-color: #ffffff12;

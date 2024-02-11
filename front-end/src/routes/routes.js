@@ -3,6 +3,7 @@ import Login from "../pages/login";
 import ChatScreen from "../pages";
 import SignIn from "../pages/login/signIn";
 import SignUp from "../pages/login/signUp";
+import Chat from "../components/chat";
 
 const PrivetRoute = ({ children }) => {
   const token = localStorage.getItem('token')
@@ -15,7 +16,11 @@ const Routes = createBrowserRouter([
     element:
       <PrivetRoute>
         <ChatScreen />
-      </PrivetRoute>
+      </PrivetRoute>,
+    children: [
+      { path: '/user/:id', element: <Chat /> },
+      { path: '/group/:id', element: <Chat /> },
+    ]
   }, {
     path: '/sign-in',
     element: <SignIn />

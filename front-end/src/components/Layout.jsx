@@ -1,10 +1,8 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Outlet } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import socket from '../socket'
-import Chat from './chat'
 import Menu from './menu'
-import Profile from './profile'
 import Style from './style.module.scss'
 
 const Layout = () => {
@@ -41,8 +39,7 @@ const Layout = () => {
     <>
       <div className={Style.chatBox}>
         <Menu />
-        <Chat />
-        <Profile />
+        <Outlet />
       </div>
     </>
   )

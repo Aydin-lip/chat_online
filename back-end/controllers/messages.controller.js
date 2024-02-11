@@ -42,3 +42,12 @@ export const SendMessage = (io, socket, data) => {
       socket.emit('error', { path: 'Send_Message', message: 'Error in validation!', error: errV })
     })
 }
+
+export const GetChatMessages = (socket, ref_id, options) => {
+  MessagesMD.getByRefId(ref_id, options, (res, err) => {
+    if (res) {
+      socket.emit('Get_Chat_Messages', res)
+    } else
+      socket.emit('error', { path: 'Get_Chat_Messages', message: 'Have a problem in get messages!', error: err })
+  })
+}

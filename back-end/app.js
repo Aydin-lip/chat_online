@@ -18,6 +18,7 @@ import OnlineUsersMD from './models/online_users.model.js'
 import UsersMD from './models/users.model.js'
 import ChatsMD from './models/chats.model.js'
 import MessagesMD from './models/messages.model.js'
+import { GetChatMessages } from './controllers/messages.controller.js'
 
 configDotenv()
 
@@ -107,6 +108,7 @@ io.use(Authorization).on('connection', socket => {
   socket.on('Get_Users_Custom_Info', (...arg) => GetUsersCustomInfo(socket, ...arg))
   socket.on('Get_Group_Custom_Info', (...arg) => GetGroupCustomInfo(socket, ...arg))
 
+  socket.on('Get_Chat_Messages', (...arg) => GetChatMessages(socket, ...arg))
   socket.on('Seen_Messages', (...arg) => SeenMessages(socket, ...arg))
 
   app.use('/send_message', ChatRouter)
