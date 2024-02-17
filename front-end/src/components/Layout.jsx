@@ -1,12 +1,19 @@
 import { useEffect } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import { useDispatch, useSelector } from 'react-redux'
 import socket from '../socket'
 import Menu from './menu'
 import Style from './style.module.scss'
+import { setInformation } from '../redux/slices/information'
+import { setUsers } from '../redux/slices/users'
+import { setGroups } from '../redux/slices/groups'
 
 const Layout = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const info = useSelector(state => state.information.info)
 
   useEffect(() => {
     socket.connect()
@@ -24,18 +31,35 @@ const Layout = () => {
       toast.error(error.message)
       navigate('/sign-in', { replace: true })
     }
+    const onInformation = data => {
+      dispatch(setInformation(data))
+    }
+    const onGetChats = data => {
+      dispatch(setUsers(data))
+    }
+    const onGetGroups = data => {
+      dispatch(setGroups(data))
+    }
 
     socket.on('connect', onConnect)
     socket.on('disconnect', onDisconnect)
     socket.on('connect_error', onConnectError)
+
+    socket.on('Get_Info', onInformation)
+    socket.on('Get_Chats', onGetChats)
+    socket.on('Get_Groups', onGetGroups)
     return () => {
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)
       socket.off('connect_error', onConnectError)
+
+      socket.off('Get_Info', onInformation)
+      socket.off('Get_Chats', onGetChats)
+      socket.off('Get_Groups', onGetGroups)
     }
   }, [])
 
-  return (
+  return info.id && (
     <>
       <div className={Style.chatBox}>
         <Menu />

@@ -35,6 +35,18 @@ class ChatsMD {
       .catch(err => callback(null, err))
   }
 
+  static async getById(id, callback) {
+    return ChatsDB.findOne({ where: { id } })
+      .then(res => {
+        callback?.(res)
+        return res
+      })
+      .catch(err => {
+        callback?.(null, err)
+        return err
+      })
+  }
+
 }
 
 export default ChatsMD;

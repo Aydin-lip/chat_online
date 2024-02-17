@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigation } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
 import ChatFooter from "./footer"
 import ChatHeader from "./header"
 import socket from "../../socket"
@@ -8,14 +9,18 @@ import FileMessage from "./messages/file"
 import VoiceMessage from "./messages/voice"
 import Style from './style.module.scss'
 import Profile from "../profile"
+import UnRead from "./messages/unRead"
+import { setMessages } from "../../redux/slices/messages"
+import { editGroup } from "../../redux/slices/groups"
 
 const Chat = () => {
-  const [info, setInfo] = useState({})
-  const [messages, setMessages] = useState([])
-  const [chatInfo, setChatInfo] = useState({})
-
   const location = useLocation()
-  const navigation = useNavigation()
+  const dispatch = useDispatch()
+
+  const info = useSelector(state => state.information.info)
+  const messages = useSelector(state => state.messages.messages)
+  const users = useSelector(state => state.users.users)
+  const groups = useSelector(state => state.groups.groups)
 
   const chatContent = useRef()
 
@@ -28,44 +33,53 @@ const Chat = () => {
     return chat
   }, [location.pathname])
 
+  const chatInfo = useMemo(() => ([...users, ...groups].find(chat => chat.id === chatId)), [chatId, chatKind, users, groups])
+
   useEffect(() => {
     const onGetMessages = data => {
-      setMessages(data)
-    }
+      const first = data.filter(msg => msg?.user_id == info.id || JSON.parse(msg?.seen ?? "[]").includes(info.id))
+      const last = data.filter(msg => msg?.user_id != info.id && !JSON.parse(msg?.seen ?? "[]").includes(info.id))
 
+      if ((last.length >= 2) && !data.find(msg => msg.type === 'unread')) {
+        first.push({ type: "unread" })
+      } else if ((last.length < 2) && data.find(msg => msg.type === 'unread')) {
+        return dispatch(setMessages(data.filter(msg => msg.type !== 'unread')))
+      }
+      dispatch(setMessages([...first, ...last]))
+    }
     const onGetChatInfo = data => {
-      setChatInfo(data)
+      dispatch(editGroup({
+        id: chatId,
+        group: {
+          ...chatInfo,
+          members: data.members,
+          online_members: data.online_members
+        }
+      }))
     }
 
     socket.emit('Select_Chat', chatId)
     socket.emit('Get_Chat_Messages', chatId)
 
-    chatKind === 'group' ?
-      socket.emit('Get_Group_Custom_Info', chatId)
-      :
-      socket.emit('Get_User_Custom_Info', navigation.text)
-
-
-    socket.on('Get_Info', data => setInfo(data))
+    chatKind === 'group' &&
+      socket.emit('Get_Group_Custom_Info', chatId, ['online_members'])
 
     socket.on('Get_Chat_Messages', onGetMessages)
     socket.on('Get_Group_Custom_Info', onGetChatInfo)
-    socket.on('Get_User_Custom_Info', onGetChatInfo)
     return () => {
       socket.off('Get_Chat_Messages', onGetMessages)
       socket.off('Get_Group_Custom_Info', onGetChatInfo)
-      socket.off('Get_User_Custom_Info', onGetChatInfo)
     }
   }, [chatKind, chatId])
 
-  useEffect(() => {
-    if (chatContent.current)
-      chatContent.current.scrollTo({
-        top: chatContent.current.scrollHeight + 200,
-        left: 0,
-        behavior: 'smooth'
-      })
-  }, [chatContent.current?.scrollHeight])
+  // useEffect(() => {
+  //   if (chatContent.current)
+  //     chatContent.current.scrollTo({
+  //       top: chatContent.current.scrollHeight + 200,
+  //       left: 0,
+  //       behavior: 'smooth'
+  //     })
+  // }, [chatContent.current?.scrollHeight])
 
   return chatInfo?.id && (
     <>
@@ -84,13 +98,15 @@ const Chat = () => {
                   <FileMessage message={message} user={info} group={chatKind === 'group'} />
                   : message.type === 'voice' ?
                     <VoiceMessage message={message} user={info} group={chatKind === 'group'} />
-                    : ''
+                    : message.type === 'unread' ?
+                      <UnRead />
+                      : ''
               }
             </div>
           )}
         </div>
 
-        {/* <ChatFooter data={info} /> */}
+        <ChatFooter data={info} />
       </div>
       <Profile />
     </>

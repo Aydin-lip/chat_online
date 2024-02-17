@@ -1,28 +1,24 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useNavigation } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useNavigation, useLocation, Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 import socket from '../../socket'
 import Style from './style.module.scss'
 
 const Menu = () => {
-  const [info, setInfo] = useState({})
-  const [users, setUsers] = useState([])
-  const [groups, setGroups] = useState([])
-  const [selectUser, setSelectUser] = useState('')
+  const info = useSelector(state => state.information.info)
+  const users = useSelector(state => state.users.users)
+  const groups = useSelector(state => state.groups.groups)
 
   const navigation = useNavigation()
+  const location = useLocation()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    socket.on('Get_Info', data => setInfo(data))
-    socket.on('Get_Chats', data => setUsers(data))
-    socket.on('Get_Groups', data => setGroups(data))
-  }, [info, users])
+  const chatId = useMemo(() => location?.pathname.split('/').slice(-1).join(), [location.pathname])
 
   const selectChatHandler = (chat, group) => {
     navigation.text = chat?.user_id
     navigate(`/${group ? 'group' : 'user'}/${chat.id}`)
-    setSelectUser(chat.id)
   }
 
   const getDate = (date) => {
@@ -68,7 +64,7 @@ const Menu = () => {
           {users?.map(user =>
             <div
               key={user.id}
-              className={selectUser === user.id ? Style.active : ''}
+              className={chatId == user.id ? Style.active : ''}
               onClick={e => selectChatHandler(user)}>
               <div className={Style.avatar}>
                 <img src={user.avatar?.length > 0 ? user?.avatar?.[0] : "/images/avatar.png"} alt="default avatar" />
@@ -97,7 +93,7 @@ const Menu = () => {
           {groups?.map(group =>
             <div
               key={group.id}
-              className={selectUser === group.id ? Style.active : ''}
+              className={chatId == group.id ? Style.active : ''}
               onClick={e => selectChatHandler(group, true)}>
               <div className={Style.avatar}>
                 <img src={group.avatar?.length > 0 ? group?.avatar?.[0] : "/images/group_prof.jpg"} alt="default avatar" />

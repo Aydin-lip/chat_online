@@ -1,5 +1,7 @@
+import ChatsMD from "../models/chats.model.js"
 import GroupsMD from "../models/groups.model.js"
 import MessagesMD from "../models/messages.model.js"
+import UsersMD from "../models/users.model.js"
 import { AddNewMessageValidation } from "../validations/messages.validation.js"
 
 export const SeenMessages = (socket, ids) => {
@@ -27,8 +29,22 @@ export const SendMessage = (io, socket, data) => {
                     message: { user: { firstname, lastname, avatar }, ...res }
                   })
                 })
-              else
-                socket.emit('error', { path: 'Send_Message', message: 'dont have data in resOU!', error: errOU })
+              else {
+                ChatsMD.getById(data.ref_id, ({ dataValues }, errC) => {
+                  if (!errC) {
+                    if (dataValues) {
+                      const id = dataValues.user_1 == socket.user.id ? dataValues.user_2 : dataValues.user_1
+                      io.to(id).emit('New_Message', {
+                        message: { user: { firstname, lastname, avatar }, ...res }
+                      })
+                    } else {
+                      socket.emit('error', { path: 'Send_Message', message: 'not found chat for user_id!', error: errC })
+                    }
+                  } else {
+                    socket.emit('error', { path: 'Send_Message', message: 'Error in get chat for user_id!', error: errC })
+                  }
+                })
+              }
             } else {
               socket.emit('error', { path: 'Send_Message', message: 'Error for send message get online users!', error: errOU })
             }

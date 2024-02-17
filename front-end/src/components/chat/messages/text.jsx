@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import Style from './style.module.scss'
 
 const TextMessage = ({ message, user }) => {
