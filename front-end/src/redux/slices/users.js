@@ -24,30 +24,22 @@ const usersSlice = createSlice({
         state.users = [...firstStep, action.payload.user, ...lastStep]
       }
     },
-    changeActive(state, action) {
+    changeActiveUser(state, action) {
       const { id, active } = action.payload
       const user = state.users.find(u => u.id == id)
       if (user) {
         this.editUser({ id, user: { ...user, online: active } })
       }
     },
-    seenLastMessage(state, action) {
-      const { seen, id } = action.payload
-      const user = state.users.find(u => u.id == id)
-      if (user) {
-        const allSeen = JSON.parse(user.lastMessage.seen)
-        seen.includes(user.lastMessage.id) && allSeen.push(user.user_id)
-        const changed = {
-          ...user,
-          lastMessage: {
-            ...user.lastMessage,
-            seen: allSeen
-          }
-        }
-        this.editUser({ id, user: changed })
-      }
+    seenLastMessageUser(state, action) {
+      const seen = action.payload
+      state.users = state.users.map(user =>
+        seen.includes(user.lastMessage?.id) ?
+          ({ ...user, lastMessage: { ...user.lastMessage, seen: [...user.lastMessage.seen, user.user_id] } })
+          : user
+      )
     },
-    changeLastMessage(state, action) {
+    changeLastMessageUser(state, action) {
       const { id, message } = action.payload
       const user = state.users.find(u => u.id == id)
       if (user) {
@@ -58,9 +50,15 @@ const usersSlice = createSlice({
         this.editUser({ id, user: changed })
       }
     },
-
+    changeNotSeenMessages(state, action) {
+      const { seen, ref_id } = action.payload
+      state.users.map(user => user.id === ref_id ? ({
+        ...user,
+        notSeenMessages: user.notSeenMessages - seen.length
+      }) : user)
+    }
   }
 })
 
-export const { changeLastMessage, seenLastMessage, changeActive, editUser, deleteUser, addUser, setUsers } = usersSlice.actions
+export const { changeLastMessageUser, seenLastMessageUser, changeActiveUser, editUser, deleteUser, addUser, setUsers } = usersSlice.actions
 export default usersSlice.reducer

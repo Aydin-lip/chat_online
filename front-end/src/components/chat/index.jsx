@@ -37,8 +37,10 @@ const Chat = () => {
 
   useEffect(() => {
     const onGetMessages = data => {
-      const first = data.filter(msg => msg?.user_id == info.id || JSON.parse(msg?.seen ?? "[]").includes(info.id))
-      const last = data.filter(msg => msg?.user_id != info.id && !JSON.parse(msg?.seen ?? "[]").includes(info.id))
+      data = data.map(msg => ({ ...msg, seen: JSON.parse(msg.seen), actions: JSON.parse(msg.actions) }))
+
+      const first = data.filter(msg => msg?.user_id == info.id || msg?.seen.includes(info.id))
+      const last = data.filter(msg => msg?.user_id != info.id && !msg?.seen.includes(info.id))
 
       if ((last.length >= 2) && !data.find(msg => msg.type === 'unread')) {
         first.push({ type: "unread" })
@@ -72,14 +74,38 @@ const Chat = () => {
     }
   }, [chatKind, chatId])
 
-  // useEffect(() => {
-  //   if (chatContent.current)
+  // useEff if (chatContent.current)
   //     chatContent.current.scrollTo({
   //       top: chatContent.current.scrollHeight + 200,
-  //       left: 0,
+  //       left: 0,ect(() => {
+  //  
   //       behavior: 'smooth'
   //     })
   // }, [chatContent.current?.scrollHeight])
+
+  useEffect(() => {
+    const rows = document.querySelectorAll('.observ')
+
+    const ids = []
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const seenId = +entry.target.dataset?.seen
+        if (entry.isIntersecting && !ids.includes(seenId))
+          ids.push(seenId)
+      })
+      // socket.emit('Seen_Messages', idx, chatId)
+    })
+
+    rows?.forEach(row => {
+      if (row.dataset.seen !== '0') {
+        console.log(row)
+        observer.observe(row)
+      } else {
+        observer.unobserve(row)
+      }
+    })
+
+  }, [messages])
 
   return chatInfo?.id && (
     <>
@@ -88,7 +114,7 @@ const Chat = () => {
 
         <div className={Style.content} ref={chatContent}>
           {messages?.map((message, idx) =>
-            <div key={idx} className={`${message.user_id === info.id ? Style.sender : ''}`}>
+            <div key={idx} className={`${message.user_id === info.id ? Style.sender : ''} ${message.type !== 'unread' ? 'observ' : ''}`} data-seen={message.seen?.includes(info.id) ? '0' : message.id}>
               {/* <div className={Style.avatar}>
                 <img src="/images/avatar.png" alt="default avatar" />
               </div> */}

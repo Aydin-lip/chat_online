@@ -6,7 +6,7 @@ import socket from '../socket'
 import Menu from './menu'
 import Style from './style.module.scss'
 import { setInformation } from '../redux/slices/information'
-import { setUsers } from '../redux/slices/users'
+import { seenLastMessageUser, setUsers } from '../redux/slices/users'
 import { setGroups } from '../redux/slices/groups'
 
 const Layout = () => {
@@ -40,6 +40,9 @@ const Layout = () => {
     const onGetGroups = data => {
       dispatch(setGroups(data))
     }
+    const onSeenMessages = data => {
+      // dispatch(seenLastMessageUser(data.seen_messages_id))
+    }
 
     socket.on('connect', onConnect)
     socket.on('disconnect', onDisconnect)
@@ -48,6 +51,7 @@ const Layout = () => {
     socket.on('Get_Info', onInformation)
     socket.on('Get_Chats', onGetChats)
     socket.on('Get_Groups', onGetGroups)
+    socket.on('Seen_Messages', onSeenMessages)
     return () => {
       socket.off('connect', onConnect)
       socket.off('disconnect', onDisconnect)

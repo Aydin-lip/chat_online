@@ -26,7 +26,7 @@ const messagesSlice = createSlice({
     },
     seenMessages(state, action) {
       const { seen, user_id } = action.payload
-      state.messages = state.messages.map(msg => seen.includes(msg.id) ? ({ ...msg, seen: [...JSON.parse(msg.seen), user_id] }) : msg)
+      state.messages = state.messages.map(msg => seen.includes(msg.id) ? ({ ...msg, seen: [...msg.seen, user_id] }) : msg)
     }
   }
 })

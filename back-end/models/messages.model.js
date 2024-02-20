@@ -17,7 +17,7 @@ class MessagesMD {
   }
 
   add(callback) {
-    MessagesDB.create({ ...this, seen: [], actions: [] })
+    MessagesDB.create({ ...this, seen: [user_id], actions: [] })
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }
@@ -158,7 +158,7 @@ class MessagesMD {
             }
           }, {
             seen: {
-              [Op.notRegexp]: user_id
+              [Op.notRegexp]: literal(`JSON_CONTAINS(seen, ${user_id})`)
             }
           }
         ]
@@ -169,7 +169,7 @@ class MessagesMD {
         Promise.all(messages.map(message =>
           MessagesDB.update({ seen: [...JSON.parse(message.seen), user_id] }, { where: { id: message.id } })
         ))
-          .then(resP => callback(resP))
+          .then(resP => callback({ response: resP, seen: messages.map(msg => msg.id) }))
           .catch(errP => callback(null, errP))
       })
       .catch(err => callback(null, err))

@@ -109,7 +109,7 @@ io.use(Authorization).on('connection', socket => {
   socket.on('Get_Group_Custom_Info', (...arg) => GetGroupCustomInfo(socket, ...arg))
 
   socket.on('Get_Chat_Messages', (...arg) => GetChatMessages(socket, ...arg))
-  socket.on('Seen_Messages', (...arg) => SeenMessages(socket, ...arg))
+  socket.on('Seen_Messages', (...arg) => SeenMessages(io, socket, ...arg))
 
   app.use('/send_message', ChatRouter)
   socket.on('Send_Message', (...arg) => SendMessage(io, socket, ...arg))
