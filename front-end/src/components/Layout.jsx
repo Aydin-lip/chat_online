@@ -7,7 +7,7 @@ import Menu from './menu'
 import Style from './style.module.scss'
 import { setInformation } from '../redux/slices/information'
 import { changeLastMessageUser, seenLastMessageUser, setUsers } from '../redux/slices/users'
-import { setGroups } from '../redux/slices/groups'
+import { changeLastMessageGroup, setGroups } from '../redux/slices/groups'
 import { addNewMessage } from '../redux/slices/messages'
 
 const Layout = () => {
@@ -69,7 +69,8 @@ const Layout = () => {
       if (!message) return
 
       dispatch(changeLastMessageUser({ user_id: info.id, message }))
-      dispatch(addNewMessage(message))
+      dispatch(changeLastMessageGroup({ user_id: info.id, message }))
+      dispatch(addNewMessage({user_id: info.id, message}))
     }
 
     socket.on('New_Message', onNewMessage)

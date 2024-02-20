@@ -24,7 +24,7 @@ const groupsSlice = createSlice({
         state.groups = groups
       }
     },
-    seenLastMessage(state, action) {
+    seenLastMessageGroup(state, action) {
       const { user_id, id } = action.payload
       const group = state.groups.find(u => u.id == id)
       if (group) {
@@ -37,22 +37,29 @@ const groupsSlice = createSlice({
             seen: allSeen
           }
         }
-        this.editGroup({ id, group: changed })
+        editGroup({ id, group: changed })
       }
     },
-    changeLastMessage(state, action) {
-      const { id, message } = action.payload
-      const group = state.groups.find(u => u.id == id)
-      if (group) {
+    changeLastMessageGroup(state, action) {
+      const { user_id, message } = action.payload
+      const { groups } = state
+      const user = groups.find(u => u.id == message.ref_id)
+      if (user) {
         const changed = {
-          ...group,
+          ...user,
           lastMessage: message
         }
-        this.editGroup({ id, group: changed })
+        console.log(message.user_id, user_id)
+        if (message.user_id != user_id)
+          changed.notSeenMessages = user.notSeenMessages + 1
+        // editUser({ id, user: changed })
+        const idx = groups.indexOf(groups.find(u => u.id == message.ref_id))
+        groups.splice(idx, 1, changed)
+        state.groups = groups
       }
     },
   }
 })
 
-export const { changeLastMessage, seenLastMessage, changeActive, editGroup, removeGroup, addGroup, setGroups } = groupsSlice.actions
+export const { changeLastMessageGroup, seenLastMessageGroup, changeActive, editGroup, removeGroup, addGroup, setGroups } = groupsSlice.actions
 export default groupsSlice.reducer
