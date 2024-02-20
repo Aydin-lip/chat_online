@@ -17,7 +17,7 @@ class MessagesMD {
   }
 
   add(callback) {
-    MessagesDB.create({ ...this, seen: [user_id], actions: [] })
+    MessagesDB.create({ ...this, seen: [this.user_id], actions: [] })
       .then(({ dataValues }) => callback(dataValues))
       .catch(err => callback(null, err))
   }

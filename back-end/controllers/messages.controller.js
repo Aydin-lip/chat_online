@@ -55,14 +55,21 @@ export const SendMessage = (io, socket, data) => {
                   })
                 })
               else {
-                ChatsMD.getById(data.ref_id, ({ dataValues }, errC) => {
+                ChatsMD.getById(data.ref_id, (resC, errC) => {
+                  const dataValues = resC?.dataValues
                   if (!errC) {
                     if (dataValues) {
-                      [dataValues.user_2, dataValues.user_1].forEach(id => {
-                        io.to(id).emit('New_Message', {
-                          message: { user: { firstname, lastname, avatar }, ...res }
+                      OnlineUsersMD.getAllByUsersId([dataValues.user_2, dataValues.user_1], ['id', 'user_id'])
+                        .then(result => {
+                          result.forEach(item => {
+                            io.to(item.id).emit('New_Message', {
+                              message: { user: { firstname, lastname, avatar }, ...res }
+                            })
+                          })
                         })
-                      })
+                        .catch(errr => {
+                          socket.emit('error', { path: 'Send_Message', message: 'error in get online user id for chat!', error: err })
+                        })
                     } else {
                       socket.emit('error', { path: 'Send_Message', message: 'not found chat for user_id!', error: errC })
                     }
@@ -81,6 +88,7 @@ export const SendMessage = (io, socket, data) => {
       })
     })
     .catch(errV => {
+      console.log(errV)
       socket.emit('error', { path: 'Send_Message', message: 'Error in validation!', error: errV })
     })
 }

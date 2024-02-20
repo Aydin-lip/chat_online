@@ -79,7 +79,7 @@ const Menu = () => {
               <div className={Style.detail}>
                 <span className={Style.date}>{getDate(user.lastMessage?.createdAt)}</span>
                 {user.lastMessage?.user_id === info.id &&
-                  <span className={Style.status}>✔{JSON.parse(user.lastMessage?.seen ?? "[]").length > 0 && '✔'}</span>
+                  <span className={Style.status}>✔{JSON.parse(user.lastMessage?.seen ?? "[]").length > 1 && '✔'}</span>
                 }
                 {user.notSeenMessages > 0 &&
                   <span className={Style.unSeen}>{user.notSeenMessages}</span>

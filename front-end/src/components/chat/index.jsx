@@ -74,14 +74,14 @@ const Chat = () => {
     }
   }, [chatKind, chatId])
 
-  // useEff if (chatContent.current)
-  //     chatContent.current.scrollTo({
-  //       top: chatContent.current.scrollHeight + 200,
-  //       left: 0,ect(() => {
-  //  
-  //       behavior: 'smooth'
-  //     })
-  // }, [chatContent.current?.scrollHeight])
+  useEffect(() => {
+    if (chatContent.current)
+      chatContent.current.scrollTo({
+        top: chatContent.current.scrollHeight + 200,
+        left: 0,
+        behavior: 'smooth'
+      })
+  }, [chatContent.current?.scrollHeight])
 
   useEffect(() => {
     const rows = document.querySelectorAll('.observ')
@@ -98,7 +98,6 @@ const Chat = () => {
 
     rows?.forEach(row => {
       if (row.dataset.seen !== '0') {
-        console.log(row)
         observer.observe(row)
       } else {
         observer.unobserve(row)
@@ -132,7 +131,7 @@ const Chat = () => {
           )}
         </div>
 
-        <ChatFooter data={info} />
+        <ChatFooter data={chatInfo} />
       </div>
       <Profile />
     </>

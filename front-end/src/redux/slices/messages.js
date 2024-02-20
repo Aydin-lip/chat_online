@@ -10,7 +10,9 @@ const messagesSlice = createSlice({
       state.messages = action.payload
     },
     addNewMessage(state, action) {
-      state.messages = [...state.messages, action.payload]
+      if ((state.messages[0]?.ref_id ?? 0) == action.payload.ref_id) {
+        state.messages = [...state.messages, action.payload]
+      }
     },
     deleteMessage(state, action) {
       state.messages = state.messages.filter(msg => msg.id !== action.payload)

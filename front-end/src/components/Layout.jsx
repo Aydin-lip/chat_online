@@ -6,8 +6,9 @@ import socket from '../socket'
 import Menu from './menu'
 import Style from './style.module.scss'
 import { setInformation } from '../redux/slices/information'
-import { seenLastMessageUser, setUsers } from '../redux/slices/users'
+import { changeLastMessageUser, seenLastMessageUser, setUsers } from '../redux/slices/users'
 import { setGroups } from '../redux/slices/groups'
+import { addNewMessage } from '../redux/slices/messages'
 
 const Layout = () => {
   const navigate = useNavigate()
@@ -27,9 +28,9 @@ const Layout = () => {
       toast.info('Disconnected')
     }
     const onConnectError = error => {
-      localStorage.clear()
-      toast.error(error.message)
-      navigate('/sign-in', { replace: true })
+      // localStorage.clear()
+      // toast.error(error.message)
+      // navigate('/sign-in', { replace: true })
     }
     const onInformation = data => {
       dispatch(setInformation(data))
@@ -52,16 +53,30 @@ const Layout = () => {
     socket.on('Get_Chats', onGetChats)
     socket.on('Get_Groups', onGetGroups)
     socket.on('Seen_Messages', onSeenMessages)
-    return () => {
-      socket.off('connect', onConnect)
-      socket.off('disconnect', onDisconnect)
-      socket.off('connect_error', onConnectError)
 
-      socket.off('Get_Info', onInformation)
-      socket.off('Get_Chats', onGetChats)
-      socket.off('Get_Groups', onGetGroups)
+
+    const errorHandler = err => {
+      console.log(err)
     }
+    socket.on('error', errorHandler)
   }, [])
+
+  useEffect(() => {
+    if (!info.id) return
+
+    const onNewMessage = data => {
+      const message = data.message
+      if (!message) return
+
+      dispatch(changeLastMessageUser({ user_id: info.id, message }))
+      dispatch(addNewMessage(message))
+    }
+
+    socket.on('New_Message', onNewMessage)
+    return () => {
+      socket.off('New_Message', onNewMessage)
+    }
+  }, [info])
 
   return info.id && (
     <>

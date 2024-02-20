@@ -151,7 +151,10 @@ class GroupsMD {
       where: { id },
       attributes: ['id', ...attributes]
     })
-      .then(async ({ dataValues }) => {
+      .then(async res => {
+        const dataValues = res?.dataValues
+        if (!dataValues) return callback(false)
+
         if (members) dataValues.members = JSON.parse(dataValues.members)
 
         if (!onlineMembers) return callback(dataValues)

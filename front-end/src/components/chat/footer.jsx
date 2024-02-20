@@ -37,20 +37,20 @@ const ChatFooter = ({ data }) => {
     socket.emit('typing', false)
     const newMessage = {
       type,
-      to: data.username
+      ref_id: data.id
     }
-    if (type === 'Message') {
-      socket.emit('send_message', {
+    if (type === 'text') {
+      socket.emit('Send_Message', {
         ...newMessage,
         text: message,
       })
       messageText.current.innerHTML = ''
       setMessage('')
-    } else if (type === 'File') {
+    } else if (type === 'file') {
       const formData = new FormData()
       formData.append('file', send_data)
 
-      httpService.post(`chat/send_message/file`, formData)
+      httpService.post(`send_message/file`, formData)
         .then(({ data }) => {
           socket.emit('send_message', {
             ...newMessage,
@@ -59,11 +59,11 @@ const ChatFooter = ({ data }) => {
           })
         })
         .catch(err => console.log(err))
-    } else if (type === 'Voice') {
+    } else if (type === 'voice') {
       const formData = new FormData()
       formData.append('voice', send_data.data)
 
-      httpService.post(`chat/send_message/voice`, formData)
+      httpService.post(`send_message/voice`, formData)
         .then(({ data }) => {
           socket.emit('send_message', {
             ...newMessage,
@@ -126,7 +126,7 @@ const ChatFooter = ({ data }) => {
           const stringTime = recordingTime.current.innerText?.split(',')[0]
           const sTimeSplit = stringTime.split(':')
           const objTime = { min: Number(sTimeSplit[0]), second: Number(sTimeSplit[1]) }
-          sendMessageHandle('Voice', { data: e.data, duration: objTime })
+          sendMessageHandle('voice', { data: e.data, duration: objTime })
         }
       }
       audioStream = null
@@ -178,7 +178,7 @@ const ChatFooter = ({ data }) => {
     }
 
     if (message.trim()?.length > 0) {
-      sendMessageHandle('Message')
+      sendMessageHandle('text')
     }
   }
 
@@ -193,7 +193,7 @@ const ChatFooter = ({ data }) => {
 
   const selectFileHandle = e => {
     if (e.target.files[0])
-      sendMessageHandle('File', e.target.files[0])
+      sendMessageHandle('file', e.target.files[0])
     fileRef.current = ''
   }
 

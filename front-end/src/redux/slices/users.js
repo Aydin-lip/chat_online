@@ -19,16 +19,16 @@ const usersSlice = createSlice({
       const id = action.payload?.id
       const { users } = state
       if (id) {
-        const firstStep = users.filter(u => u.id > id)
-        const lastStep = users.filter(u => u.id < id)
-        state.users = [...firstStep, action.payload.user, ...lastStep]
+        const idx = users.indexOf(users.find(u => u.id == id))
+        users.splice(idx, 1, action.payload.user)
+        state.users = users
       }
     },
     changeActiveUser(state, action) {
       const { id, active } = action.payload
       const user = state.users.find(u => u.id == id)
       if (user) {
-        this.editUser({ id, user: { ...user, online: active } })
+        editUser({ id, user: { ...user, online: active } })
       }
     },
     seenLastMessageUser(state, action) {
@@ -40,14 +40,21 @@ const usersSlice = createSlice({
       )
     },
     changeLastMessageUser(state, action) {
-      const { id, message } = action.payload
-      const user = state.users.find(u => u.id == id)
+      const { user_id, message } = action.payload
+      const { users } = state
+      const user = users.find(u => u.id == message.ref_id)
       if (user) {
         const changed = {
           ...user,
           lastMessage: message
         }
-        this.editUser({ id, user: changed })
+        console.log(message.user_id, user_id)
+        if (message.user_id != user_id)
+          changed.notSeenMessages = user.notSeenMessages + 1
+        // editUser({ id, user: changed })
+        const idx = users.indexOf(users.find(u => u.id == message.ref_id))
+        users.splice(idx, 1, changed)
+        state.users = users
       }
     },
     changeNotSeenMessages(state, action) {
