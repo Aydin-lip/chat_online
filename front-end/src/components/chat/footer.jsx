@@ -52,11 +52,15 @@ const ChatFooter = ({ data }) => {
 
       httpService.post(`send_message/file`, formData)
         .then(({ data }) => {
-          socket.emit('send_message', {
+          socket.emit('Send_Message', {
             ...newMessage,
             name: data.name,
-            path: data.path
+            path: data.path,
+            description: message,
+            size: send_data?.size ?? 0
           })
+          messageText.current.innerHTML = ''
+          setMessage('')
         })
         .catch(err => console.log(err))
     } else if (type === 'voice') {
@@ -65,10 +69,11 @@ const ChatFooter = ({ data }) => {
 
       httpService.post(`send_message/voice`, formData)
         .then(({ data }) => {
-          socket.emit('send_message', {
+          const { min, second } = send_data.duration
+          socket.emit('Send_Message', {
             ...newMessage,
             path: data.path,
-            duration: send_data.duration
+            time: (min * 60) + second
           })
         })
         .catch(err => console.log(err))

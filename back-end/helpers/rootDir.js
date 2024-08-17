@@ -1,5 +1,8 @@
-import path from 'path'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url';
 
-export const RootDir = (paths) => {
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export const RootDir = (paths = []) => {
   return path.join(__dirname, '..', ...paths)
 }

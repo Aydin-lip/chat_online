@@ -19,10 +19,10 @@ import UsersMD from './models/users.model.js'
 import ChatsMD from './models/chats.model.js'
 import MessagesMD from './models/messages.model.js'
 import { GetChatMessages } from './controllers/messages.controller.js'
+import { RootDir } from './helpers/rootDir.js'
 
 configDotenv()
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express()
 const server = createServer(app)
 const io = new Server(server, {
@@ -35,7 +35,7 @@ const io = new Server(server, {
 app.use(AccessControllers)
 
 // app.use(express.static('public'))
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(RootDir(), 'public')))
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())

@@ -42,7 +42,7 @@ const FileMessage = ({ message, user }) => {
 
   return (
     <>
-      <div className={`${Style.file} ${message.from === user.username ? Style.reciver : Style.sender}`}>
+      <div className={`${Style.file} ${message.user_id === user.id ? Style.sender : Style.reciver}`}>
         <div className={Style.file_message} onClick={getDataFileHandler}>
           <div>
             <p>{message.name}</p>
@@ -52,10 +52,10 @@ const FileMessage = ({ message, user }) => {
             <img src={['png', 'jpg', 'jpeg'].includes(message.path.split('.')[message.path.split('.').length - 1]) ? message.path : '/images/download.png'} alt="download" />
           </span>
         </div>
-        <div className={`${Style.time} ${message.from !== user.username ? Style.sender : ''}`}>
-          <span>{message.time}</span>
-          {message.from !== user.username &&
-            <span className={Style.status}>✔{!message.unVisit && '✔'}</span>
+        <div className={`${Style.time} ${message.user_id === user.id ? '' : Style.sender}`}>
+          <span>{message.createdAt.split('T').join(' ').split('.').slice(0, -1).join().split(':').slice(0, -1).join(':')}</span>
+          {message.user_id === user.id &&
+            <span className={Style.status}>✔{message.seen?.length > 1 && '✔'}</span>
           }
         </div>
       </div>

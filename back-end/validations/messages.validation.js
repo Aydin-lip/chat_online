@@ -25,7 +25,7 @@ const AddNewMessageValidation = yup.object({
   path: typeRelation(['file', 'voice'], msg.path_Required),
   name: typeRelation(['file'], msg.name_Required),
   description: typeRelation(['file'], msg.description_Required),
-  size: typeRelation(['file', 'voice'], msg.size_Required),
+  size: typeRelation(['file'], msg.size_Required),
   time: typeRelation(['voice'], msg.time_Required),
   text: typeRelation(['text'], msg.text_Required)
 })

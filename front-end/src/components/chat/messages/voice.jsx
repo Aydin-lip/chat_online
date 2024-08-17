@@ -13,26 +13,20 @@ const VoiceMessage = ({ message, user }) => {
   const durationRef = useRef()
 
   // change text audio duration function
-  const durationTextFunc = (M, S, MD, SD) =>
+  const durationTextFunc = (M, S) =>
     durationRef.current.innerText = `${M}:${S < 10 ? '0' + S : S}`
   // durationRef.current.innerText = `${M}:${S < 10 ? '0' + S : S} / ${MD}:${SD < 10 ? '0' + SD : SD}`
 
   // set default duration
   useEffect(() => {
-    const time = message.duration
-    const mDuration = time.min
-    const sDuration = time.second
-    durationTextFunc(0, 0, mDuration, sDuration)
+    durationTextFunc(0, 0)
   }, [])
 
   useEffect(() => {
     const audio = audioRef.current
 
     let intervalDuration
-    const time = message.duration
-    const mDuration = time.min
-    const sDuration = time.second
-    const duration = mDuration * 60 + sDuration
+    const duration = message.time
 
     const playingHandler = () => {
       intervalDuration = setInterval(() => {
@@ -45,7 +39,7 @@ const VoiceMessage = ({ message, user }) => {
         }
         const m = Math.floor(currentTime / 60)
         const s = Math.floor(currentTime % 60)
-        durationTextFunc(m, s, mDuration, sDuration)
+        durationTextFunc(m, s)
       }, 100);
     }
 
@@ -89,10 +83,7 @@ const VoiceMessage = ({ message, user }) => {
 
   const changeProgressHandler = e => {
     const audio = audioRef.current
-    const time = message.duration
-    const mDuration = time.min
-    const sDuration = time.second
-    const duration = mDuration * 60 + sDuration
+    const duration = message.time
 
     const percentClick = (e.nativeEvent.offsetX / e.target.offsetWidth) * 100   // get percent position element click
     progressRef.current.style.setProperty('--progress-position', `${percentClick}%`)    // change progress bar to click position
@@ -101,19 +92,19 @@ const VoiceMessage = ({ message, user }) => {
 
     const m = Math.floor(audioTime / 60)
     const s = Math.floor(audioTime % 60)
-    durationTextFunc(m, s, mDuration, sDuration)
+    durationTextFunc(m, s)
   }
 
   return (
     <>
-      <div className={`${Style.voice} ${message.from === user.username ? Style.reciver : Style.sender}`}>
+      <div className={`${Style.voice} ${message.user_id === user.id ? Style.sender : Style.reciver}`}>
         <audio ref={audioRef} src={voice}></audio>
         <div className={Style.voice_message}>
           <div>
-            <div className={`${Style.progress} ${message.from === user.username ? '' : Style.reciver}`} ref={progressRef} onClick={changeProgressHandler}></div>
+            <div className={`${Style.progress} ${message.user_id === user.id ? '' : Style.reciver}`} ref={progressRef} onClick={changeProgressHandler}></div>
             <span className={Style.duration} ref={durationRef}></span>
           </div>
-          <button className={message.from === user.username ? '' : Style.reciver} onClick={() => {
+          <button className={message.user_id === user.id ? '' : Style.reciver} onClick={() => {
             if (play) puseVoiceHandler()
             else if (!voice) getVoice()
             else playVoiceHandler()
@@ -127,9 +118,9 @@ const VoiceMessage = ({ message, user }) => {
             </span>
           </button>
         </div>
-        <div className={`${Style.time} ${message.from !== user.username ? Style.sender : ''}`}>
-          <span>{message.time}</span>
-          {message.from !== user.username &&
+        <div className={`${Style.time} ${message.user_id !== user.id ? '' : Style.sender}`}>
+          <span>{message.createdAt.split('T').join(' ').split('.').slice(0, -1).join().split(':').slice(0, -1).join(':')}</span>
+          {message.user_id !== user.id &&
             <span className={Style.status}>✔{!message.unVisit && '✔'}</span>
           }
         </div>

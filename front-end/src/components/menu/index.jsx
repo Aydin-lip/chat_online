@@ -74,7 +74,10 @@ const Menu = () => {
               </div>
               <div className={Style.specification}>
                 <span>{user.firstname ?? user.username} {user.lastname}</span>
-                <span>{user.lastMessage?.text}</span>
+                <span>{user.lastMessage?.type === 'text' ?
+                  user.lastMessage?.text
+                  : `${user.lastMessage?.type} ${user.lastMessage?.name ? `: ${user.lastMessage?.name}` : ''}`
+                }</span>
               </div>
               <div className={Style.detail}>
                 <span className={Style.date}>{getDate(user.lastMessage?.createdAt)}</span>
@@ -108,7 +111,7 @@ const Menu = () => {
               <div className={Style.detail}>
                 <span className={Style.date}>{getDate(group.lastMessage?.createdAt)}</span>
                 {group.lastMessage?.user_id === info.id &&
-                  <span className={Style.status}>✔{JSON.parse(group.lastMessage?.seen ?? "[]").length > 0 && '✔'}</span>
+                  <span className={Style.status}>✔{JSON.parse(group.lastMessage?.seen ?? "[]").length > 1 && '✔'}</span>
                 }
                 {group.notSeenMessages > 0 &&
                   <span className={Style.unSeen}>{group.notSeenMessages}</span>

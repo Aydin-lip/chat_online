@@ -8,10 +8,10 @@ const messagesSlice = createSlice({
   reducers: {
     setMessages(state, action) {
       state.messages = action.payload
+      console.log(state.messages[0]?.ref_id)
     },
     addNewMessage(state, action) {
       const { user_id, message } = action.payload
-      console.log()
       if (((state.messages[0]?.ref_id ?? 0) == message.ref_id) || (user_id == message.user_id)) {
         state.messages = [...state.messages, message]
       }
